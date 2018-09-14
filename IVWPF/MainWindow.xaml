@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IVWPF"
         mc:Ignorable="d"
-        Title="IVWPF" Height="600" Width="800" Background="Black" MouseDoubleClick="Window_MouseDoubleClick" MouseWheel="Image_MouseWheel" AllowDrop="True" DragEnter="Window_DragEnter" Drop="Window_Drop" DragOver="Window_DragOver" ShowInTaskbar="False" Topmost="True" Loaded="Main_Loaded">
-    <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove">
-        <Image x:Name="IVWImage" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" ClipToBounds="True" SnapsToDevicePixels="True"  AllowDrop="True" RenderTransformOrigin="0,0" MinWidth="{Binding ActualWidth, ElementName=MainCanvas, Mode=OneWay}" MinHeight="{Binding ActualHeight, ElementName=MainCanvas, Mode=OneWay}" StretchDirection="DownOnly" Stretch="None"/>
+        Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" DragEnter="Window_DragEnter" Drop="Window_Drop" DragOver="Window_DragOver" ShowInTaskbar="False" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Background="Black">
+    <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove" ManipulationDelta="MainCanvas_ManipulationDelta" TouchDown="MainCanvas_TouchDown" TouchMove="MainCanvas_TouchMove" TouchUp="MainCanvas_TouchUp" PreviewMouseWheel="Image_MouseWheel">
+        <Image x:Name="IVWImage" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" ClipToBounds="True" SnapsToDevicePixels="True"  AllowDrop="True" RenderTransformOrigin="0,0" MinWidth="{Binding ActualWidth, ElementName=MainCanvas, Mode=OneWay}" MinHeight="{Binding ActualHeight, ElementName=MainCanvas, Mode=OneWay}" StretchDirection="DownOnly" Stretch="None" IsManipulationEnabled="True" IsEnabled="False"/>
     </Canvas>
 </Window>

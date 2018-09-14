@@ -17,6 +17,104 @@ namespace IVWPF
     /*Loaderの本体 フォームから分離する */
 
 
+    public class BitmapCache
+    {
+        private int CacheSize,NextCacheSize,PreviousCacheSize,Loaded,PreLoaded;
+        private int offset = 0;
+        string[] pathes;
+        private BitmapDecoder[] sources;
+
+        public BitmapCache(int nextCacheSize,int previousCacheSize)
+        {
+            NextCacheSize = nextCacheSize;
+            PreviousCacheSize = previousCacheSize;
+            CacheSize = nextCacheSize + previousCacheSize + 1;
+            sources = new BitmapDecoder[CacheSize];
+            pathes = new string[CacheSize];
+            Loaded = 0;
+            PreLoaded = 0;
+        }
+
+        public BitmapDecoder GetNextCache()
+        {
+            int i = offset;
+            offset++;
+            if (offset >= CacheSize - 1) offset = 0;
+            if (sources[offset] == null || Loaded == 0)
+            {
+                offset = i;
+                return null;
+            }
+            if (Loaded > 0)
+            {
+                Loaded--;
+                PreLoaded++;
+                if (PreLoaded > PreviousCacheSize) PreLoaded = PreviousCacheSize;
+            }
+            return sources[offset];
+        }
+
+        public BitmapDecoder GetPreviousCache()
+        {
+            int i = offset;
+            offset--;
+            if (offset < 0) offset = CacheSize;
+            if (sources[offset] == null || PreLoaded ==0)
+            {
+                offset = i;
+                return null;
+            }
+            if (PreLoaded > 0)
+            {
+                PreLoaded--;
+                if (Loaded < NextCacheSize) Loaded++;
+            }
+            return sources[offset];
+        }
+
+        public BitmapDecoder GetCache(string path)
+        {
+            int i = 0;
+            foreach (string p in pathes)
+            {
+                if(p == path)
+                {
+                    int delta = offset - i;
+                    if (delta < 0) delta += CacheSize;
+
+                    Loaded -= delta;
+                    if (Loaded < 0) Loaded = 0;
+                    if (Loaded > NextCacheSize) Loaded = NextCacheSize;
+
+                    offset = i;
+                    return sources[i];
+                }
+                i++;
+            }
+            return null;
+        }
+
+
+        public void AddNextCache(BitmapDecoder decoder)
+        {
+            if (decoder == null) return;
+            if (Loaded >= NextCacheSize) return;
+            sources[offset + Loaded] = decoder;
+            Loaded++;
+        }
+
+        public void Clear()
+        {
+            for(int i=0; i < sources.Length; i++)
+            {
+                sources[i] = null;
+                pathes[i] = null;
+                Loaded = 0;
+                PreLoaded = 0;
+            }
+
+        }
+    }
 
 
 
@@ -31,12 +129,18 @@ namespace IVWPF
         private bool isAnimation = false;
         double scaleX = 1.0, scaleY = 1.0;
         private FileManager manager;
-
+        private BitmapCache cache;
+        private int nextCacheSize = 4;
+        private int previousCacheSize = 2;
+        private int preLoaded = 0;
+        private string currentPath;
 
         public Loader(String imagePath)
         {
 
             loadOption = new LoadOption();
+            cache = new BitmapCache(nextCacheSize, previousCacheSize);
+
             if (imagePath != null)
             {
                 Load(imagePath);
@@ -51,35 +155,130 @@ namespace IVWPF
         public bool Load(string imagePath)
         {
             manager = new FileManager(imagePath, loadOption);
-            return PaintPicture(manager.GetImagePath(imagePath));
+            preLoaded = 0;
+            bool ret = PaintPicture(manager.GetImagePath(imagePath));
+            for (int i = 0; i < nextCacheSize; i++)
+            {
+                GetCachePicture(manager.GetNextPath(false));
+            }
+            return ret;
         }
+
+
+        public bool GetCachePicture(string imagePath)
+        {
+            if (preLoaded > nextCacheSize || imagePath == null) return false;
+            try
+            {
+                Uri uri = new Uri(imagePath);
+                BitmapDecoder decoder = BitmapDecoder.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.Default);
+                cache.AddNextCache(decoder);
+                bitmapFrames = decoder.Frames;
+            }
+            catch (Exception e)
+            {
+                LogWritter.write(e.ToString());
+                return false;
+            }
+            preLoaded ++;
+            return true;
+        }
+
+
+        private BitmapDecoder GetDecoderFromPath(string path)
+        {
+            try
+            {
+                if (path == null) return null;
+                BitmapDecoder decoder = cache.GetCache(path);
+                if (decoder == null)
+                {
+                    Uri uri = new Uri(path);
+                    decoder = BitmapDecoder.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.Default);
+                    cache.AddNextCache(decoder);
+                }
+                return decoder;
+            } catch (Exception e)
+            {
+                LogWritter.write(e.ToString());
+                return null;
+            }
+        }
+
+        private bool isManga = false;
 
         public bool PaintPicture(string imagePath)
         {
             try
             {
-                LogWritter.write("Load" +imagePath);
-                Uri uri = new Uri(imagePath);
-
-                BitmapDecoder decoder = BitmapDecoder.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.Default);
-
+                BitmapDecoder decoder = GetDecoderFromPath(imagePath);
+                bitmapFrames = decoder.Frames;
                 frameCount = decoder.Frames.Count;
                 framePos = 0;
-                bitmapFrames = decoder.Frames;
+                isManga = false;
+
+                bmp = bitmapFrames[0];
+
 
                 Clear();
-                bmp = decoder.Frames[0];
                 if (frameCount > 1 && loadOption.isAnimate)
                 {
-                    if(decoder.Metadata.Format== "gif") PaintAnimationGIF(decoder);
+                    if (decoder.Metadata.Format == "gif") PaintAnimationGIF(decoder);
                 }
-                else {
+                else
+                {
                     isAnimation = false;
-                    RePaintPicture(bmp);
-                    Image.Source = bmp;
+                    if (loadOption.isMangaMode == false)
+                    {
+                        RePaintPicture(bmp);
+                        Image.Source = bmp;
+                    }
+                    else
+                    {
+
+                        String path = manager.GetNextPath(false);
+
+                        BitmapDecoder decoder2 = GetDecoderFromPath(path);
+
+                        if (decoder2 != null)
+                        {
+
+                            if (Image.MinWidth >= Image.MinHeight && bmp.PixelWidth < bmp.PixelHeight) {
+                                if (decoder2.Frames.Count == 1 || loadOption.isAnimate != false)
+                                {
+                                    BitmapSource bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
+                                    BitmapSource bmp1 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+
+                                    int width = bmp0.PixelWidth + bmp1.PixelWidth;
+                                    int height = (bmp0.PixelHeight > bmp1.PixelHeight) ? bmp0.PixelHeight : bmp1.PixelHeight;
+
+                                    int offsetY0 = (height - bmp0.PixelHeight) / 2;
+                                    int offsetY1 = (height - bmp1.PixelHeight) / 2;
+
+                                    double aspectSrc = (double)width / (double)height * 0.8; //許容値
+                                    double aspect = Image.MinWidth / Image.MinHeight;
+                                    if (aspect > aspectSrc)
+                                    {
+                                        manager.GetNextPath();
+                                        WriteableBitmap wbmp = new WriteableBitmap(width, height, 96.0 , 96.0, PixelFormats.Bgra32, null);
+                                        byte[] buf0 = new byte[bmp0.PixelWidth * bmp0.PixelHeight * 4];
+                                        byte[] buf1 = new byte[bmp1.PixelWidth * bmp1.PixelHeight * 4];
+                                        bmp0.CopyPixels(buf0, bmp0.PixelWidth * 4, 0);
+                                        bmp1.CopyPixels(buf1, bmp1.PixelWidth * 4, 0);
+                                        wbmp.WritePixels(new Int32Rect(0,offsetY1, bmp1.PixelWidth, bmp1.PixelHeight), buf1, bmp1.PixelWidth * 4, 0);
+                                        wbmp.WritePixels(new Int32Rect(bmp1.PixelWidth, offsetY0, bmp0.PixelWidth, bmp0.PixelHeight), buf0, bmp0.PixelWidth * 4, 0);
+                                        wbmp.Freeze();
+                                        isManga = true;
+                                        bmp = wbmp;
+                                    }
+                                }
+                            }
+                        }
+                        RePaintPicture(bmp);
+                        Image.Source = bmp;
+                    }
                 }
-
-
+                currentPath = imagePath;
             }
             catch (Exception e)
             {
@@ -89,7 +288,15 @@ namespace IVWPF
             return true;
         }
 
-
+        public void SetMangaMode(bool flag)
+        {
+            if(loadOption.isMangaMode != flag)
+            {
+                loadOption.isMangaMode = flag;
+                manager.SetCurrentPath(currentPath);
+                PaintPicture(currentPath);
+            }
+        }
 
         public void Clear()
         {
@@ -237,7 +444,6 @@ namespace IVWPF
             bmp.CopyPixels(buf, imgWidth, 0);
             wbmp.WritePixels(new Int32Rect(0, 0, imgWidth, imgHeight), buf, imgWidth, 0);
 
-
             for (int i = 0; i < frameCount; i++)
             {
                 BitmapSource fbmp = bitmapFrames[i];
@@ -338,6 +544,7 @@ namespace IVWPF
             Image.BeginAnimation(Image.SourceProperty, animation);
         }
 
+
         public void RePaintPicture(BitmapSource bmp, bool isAnimation)
         {
             if (isAnimation) return;
@@ -386,56 +593,167 @@ namespace IVWPF
             Image.RenderTransform = transforms;
         }
 
-        public void NextPiture()
+        public void ResizePicture(double deltaX, double deltaY)
         {
-            bool t = false;
-            if (isAnimation)
-            {
-                Image.BeginAnimation(Image.SourceProperty, null);
-                isAnimation = false;
-            } else if (frameCount > 1)
-            {
-                framePos++;
-                bmp = bitmapFrames[framePos];
-                RePaintPicture(bmp);
-                Image.Source = bmp;
-                return;
-            }
-            string imagePath = manager.GetNextPath();
-            LogWritter.write(imagePath);
-            if (imagePath == null) return;
-            t = PaintPicture(imagePath);
 
+            scaleX *= deltaX;
+            scaleY *= deltaY;
+
+            TransformGroup transforms = new TransformGroup();
+            transforms.Children.Add(new ScaleTransform(scaleX, scaleY));
+            Matrix matrix = new Matrix(1, 0, 0, 1, offsetX, offsetY);
+            transforms.Children.Add(new MatrixTransform(matrix));
+            Image.RenderTransform = transforms;
         }
 
 
+        public void NextPiture()
+        {
+            try
+            {
+                if (isManga)
+                {
+                    isManga = false;
+                }
+                bool t = isAnimation;
+                if (frameCount > 1 && framePos < frameCount && !isAnimation)
+                {
+                    framePos++;
+                    bmp = bitmapFrames[framePos];
+                    RePaintPicture(bmp);
+                    Image.Source = bmp;
+                    return;
+                }
+                string imagePath = manager.GetNextPath();
+                if (imagePath == null) return;
+                t = PaintPicture(imagePath);
+                if (!isAnimation && t)
+                {
+                    Image.BeginAnimation(Image.SourceProperty, null);
+                    isAnimation = false;
+                    frameCount = 0;
+                }
+                if( ! GetCachePicture(manager.GetNextPath(false))) preLoaded --;
+            }
+            catch(Exception e)
+            {
+                LogWritter.write(e.ToString());
+            }
+        }
+
         public void PreviousPiture()
         {
-            bool t = false;
-            if (isAnimation)
+            try
             {
-                Image.BeginAnimation(Image.SourceProperty, null);
-                isAnimation = false;
-            }
-            else if (frameCount > 1)
-            { 
-                framePos--;
-                bmp = bitmapFrames[framePos];
-                RePaintPicture(bmp);
-                Image.Source = bmp;
-                return;
-            }
-            string imagePath = manager.GetPreviousPath();
+                if (isManga)
+                {
+                    manager.GetPreviousPath();
 
-            if (imagePath == null) return;
-            PaintPicture(imagePath);
-            if (frameCount > 1 && isAnimation)
-            {
-                framePos = frameCount - 1;
-                bmp = bitmapFrames[framePos];
-                RePaintPicture(bmp);
-                Image.Source = bmp;
+                    isManga = false;
+                }
+                bool t = isAnimation;
+                string imagePath = manager.GetPreviousPath();
+                if (imagePath == null) return;
+
+                PaintPicture(imagePath);
+
+                if (!isAnimation && t)
+                {
+                    Image.BeginAnimation(Image.SourceProperty, null);
+                    isAnimation = false;
+                }
+
+                if (frameCount > 1 && !isAnimation)
+                {
+                    framePos = frameCount - 1;
+                    bmp = bitmapFrames[framePos];
+                    RePaintPicture(bmp);
+                    Image.Source = bmp;
+                }
             }
+            catch (Exception e)
+            {
+                LogWritter.write(e.ToString());
+            }
+
+        }
+
+        public void JumpPicture(int pos)
+        {
+
+            try
+            {
+                if (isManga)
+                {
+                    isManga = false;
+                }
+                if (!isAnimation)
+                {
+                    Image.BeginAnimation(Image.SourceProperty, null);
+                    isAnimation = false;
+                }
+
+                cache.Clear();
+                String path = manager.GetPathFormPos(pos);
+                PaintPicture(path);
+            }
+            catch (Exception e)
+            {
+                LogWritter.write(e.ToString());
+            }
+
+        }
+
+        public void NextFolderPicture()
+        {
+            try
+            {
+                if (isManga)
+                {
+                    isManga = false;
+                }
+                if (!isAnimation)
+                {
+                    Image.BeginAnimation(Image.SourceProperty, null);
+                    isAnimation = false;
+                }
+
+                cache.Clear();
+                String path = manager.GetNextFolderFile();
+                PaintPicture(path);
+            }
+            catch (Exception e)
+            {
+                LogWritter.write(e.ToString());
+            }
+
+
+        }
+
+        public void PreviousFolderPicture()
+        {
+            try
+            {
+                if (isManga)
+                {
+                    isManga = false;
+                }
+                if (!isAnimation)
+                {
+                    Image.BeginAnimation(Image.SourceProperty, null);
+                    isAnimation = false;
+                }
+
+                cache.Clear();
+                String path = manager.GetPreviousFolderFile();
+                PaintPicture(path);
+            }
+            catch (Exception e)
+            {
+                LogWritter.write(e.ToString());
+            }
+
+
         }
 
     }

@@ -131,6 +131,131 @@ namespace IVWPF
             Util.CalcDpi(this);
         }
 
+        private void MainCanvas_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        {
+            ManipulationDelta delta = e.DeltaManipulation;
+
+            loader.ResizePicture(delta.Scale.X,delta.Scale.Y);
+                        
+
+        }
+
+        private void MainCanvas_TouchDown(object sender, TouchEventArgs e)
+        {
+            TouchPoint p = e.GetTouchPoint(this);
+            LogWritter.write(" " + p.Position.X + "," + p.Position.Y);
+        }
+
+        private void MainCanvas_TouchMove(object sender, TouchEventArgs e)
+        {
+            TouchPoint p = e.GetTouchPoint(this);
+            LogWritter.write(" " + p.Position.X + "," + p.Position.Y);
+
+        }
+
+        private void MainCanvas_TouchUp(object sender, TouchEventArgs e)
+        {
+            TouchPoint p = e.GetTouchPoint(this);
+            LogWritter.write(" " + p.Position.X + "," + p.Position.Y);
+        }
+
+        bool pressAlt = false;
+        bool pressShift = false;
+        bool pressCtrl = false;
+
+
+        private void Main_KeyDown(object sender, KeyEventArgs e)
+        {
+            Key key = e.Key;
+            switch (e.Key)
+            {
+                case Key.System:
+                case Key.LeftAlt:
+                case Key.RightAlt:
+                    pressAlt = true;
+                    break;
+                case Key.LeftShift:
+                case Key.RightShift:
+                    pressShift = true;
+                    break;
+                case Key.LeftCtrl:
+                case Key.RightCtrl:
+                    pressCtrl = true;
+                    break;
+                case Key.Left:
+                    loader.NextPiture();
+                    break;
+                case Key.Right:
+                    loader.PreviousPiture();
+                    break;
+                case Key.Space:
+                    loader.NextPiture();
+                    break;
+                case Key.Escape:
+                    if (this.WindowState == WindowState.Maximized)
+                    {
+                        this.WindowStyle = WindowStyle.SingleBorderWindow;
+                        this.WindowState = WindowState.Normal;
+                    }
+                    else
+                    {
+                        this.WindowStyle = WindowStyle.None;
+                        this.WindowState = WindowState.Maximized;
+                    }
+                    break;
+                case Key.D1:
+                    loader.SetMangaMode(false);
+                    break;
+                case Key.D2:
+                    loader.SetMangaMode(true);
+                    break;
+                case Key.Home:
+                    loader.JumpPicture(0);
+                    break;
+                case Key.End:
+                    loader.JumpPicture(-1);
+                    break;
+                case Key.Up:
+//                    loader.PreviousFolderPicture(); // bug
+                    break;
+                case Key.Down:
+//                    loader.NextFolderPicture();
+                    break;
+                default:
+                    String str = "";
+                    if (pressCtrl) str += "CTRL+";
+                    if (pressAlt) str += "ALT+";
+                    if (pressShift) str += "SHIFT+"; 
+                    LogWritter.write(str + key.ToString() );
+                    break;
+            }
+
+        }
+
+        private void Main_KeyUp(object sender, KeyEventArgs e)
+        {
+            Key key = e.Key;
+            switch (e.Key)
+            {
+                case Key.System:
+                case Key.LeftAlt:
+                case Key.RightAlt:
+                    pressAlt = false;
+                    break;
+                case Key.LeftShift:
+                case Key.RightShift:
+                    pressShift = false;
+                    break;
+                case Key.LeftCtrl:
+                case Key.RightCtrl:
+                    pressCtrl = false;
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
             

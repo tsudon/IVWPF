@@ -34,196 +34,197 @@ namespace IVWIN
 
         public VirtualFileInfo(String path,int option)
         {
-            Uri uri = new Uri(path);
-            if (uri.Scheme.Equals("file"))
+            try
             {
-                if (File.Exists(path))
+                Uri uri = new Uri(path);
+                if (uri.Scheme.Equals("file"))
                 {
-                    FileInfo info = new FileInfo(path);
-                    Name = info.Name;
-                    FullName = info.FullName;
-                    DirectoryFullName = info.Directory.FullName;
-                    DirectoryName = info.Directory.Name;
-                    Length = info.Length;
-                    CreationTime = info.CreationTime;
-                    CreationTimeUtc = info.CreationTimeUtc;
-                    Attributes = info.Attributes;
-                    DirectoryInfo directoryInfo = new DirectoryInfo(DirectoryFullName);
-                    Parent = directoryInfo.Parent.FullName;
-
-                    Type = FileType.File;
-
-                    String ext = info.Extension.ToLower(); 
-                    if (ext == ".txt" || ext == ".json" || ext == ".text")
+                    if (File.Exists(path))
                     {
-                        Type = FileType.InfoText;
-                    } else if ( ext == ".zip")
-                    {
-                        Type = FileType.Archive;
+                        FileInfo info = new FileInfo(path);
+                        Name = info.Name;
+                        FullName = info.FullName;
+                        DirectoryFullName = info.Directory.FullName;
+                        DirectoryName = info.Directory.Name;
+                        Length = info.Length;
+                        CreationTime = info.CreationTime;
+                        CreationTimeUtc = info.CreationTimeUtc;
+                        Attributes = info.Attributes;
+                        DirectoryInfo directoryInfo = new DirectoryInfo(DirectoryFullName);
+                        Parent = directoryInfo.Parent.FullName;
+
+                        Type = FileType.File;
+
+
+                        String ext = info.Extension.ToLower();
+                        if (ext == ".txt" || ext == ".json" || ext == ".text")
+                        {
+                            Type = FileType.InfoText;
+                        }
+                        else if (ext == ".zip")
+                        {
+                            Type = FileType.Archive;
+                        }else if (ext == ".ds_store")
+                        {
+                            Type = FileType.Unknown;
+                        }
+
                     }
+                    else if (System.IO.Directory.Exists(path))
+                    {
+                        DirectoryInfo info = new DirectoryInfo(path);
+                        Name = info.Name;
+                        FullName = info.FullName;
+                        DirectoryFullName = info.FullName;
+                        DirectoryName = info.Name;
+                        Length = -1;
+                        CreationTime = info.CreationTime;
+                        CreationTimeUtc = info.CreationTimeUtc;
+                        Attributes = info.Attributes;
+                        DirectoryInfo directoryInfo = new DirectoryInfo(DirectoryFullName);
+                        Parent = directoryInfo.Parent.FullName;
+                        Type = FileType.Directory;
+                    }
+                    else
+                    {
+                        Type = FileType.Unknown;
+                        return;
+                    }
+
                 }
-                else if (System.IO.Directory.Exists(path))
-                {
-                    DirectoryInfo info = new DirectoryInfo(path);
-                    Name = info.Name;
-                    FullName = info.FullName;
-                    DirectoryFullName = info.FullName;
-                    DirectoryName = info.Name;
-                    Length = -1;
-                    CreationTime = info.CreationTime;
-                    CreationTimeUtc = info.CreationTimeUtc;
-                    Attributes = info.Attributes;
-                    DirectoryInfo directoryInfo = new DirectoryInfo(DirectoryFullName);
-                    Parent = directoryInfo.Parent.FullName;
-                    Type = FileType.Directory;
-                }
-                else
-                {
-                    Type = FileType.Unknown;
-                    return;
-                }
+            }
+            catch
+            {
 
             }
-
          }
+
 
     }
 
 
-
-
-    public class FileManager
+    class VirtualFileList
     {
-        private string path;
-        private string currentFileName;
-        private string currentDir;
+        public string currentFileName;
+        public string currentDir;
+        public string currentFullName;
         private List<VirtualFileInfo> directryListInfo = new List<VirtualFileInfo>();
-        private VirtualFileInfo[] infos;
-        List<VirtualFileInfo> dirList;
-        private VirtualFileInfo[] dirInfos;
-        private int currentDirPos;
-        private int parentDirPos =0,parentLength =1;
+        public VirtualFileInfo[] infos;
+        private List<VirtualFileInfo> dirList = new List<VirtualFileInfo>();
+        public VirtualFileInfo[] dirInfos;
+        public VirtualFileList Parent { get; private set; }
+        public int currentPos;
+        public int dirPos = 0, parentLength = 1;
+        public int nowpos;
         private LoadOption loadOption;
 
-        private int nowpos;
-
-
-        public FileManager(string path,LoadOption loadOption)
+        public VirtualFileList(LoadOption loadOption)
         {
-            this.path = path;
             this.loadOption = loadOption;
-            GetImagePath(path);
         }
 
-
-        public string GetImagePath(string path)
-        {
-            SearchDirectry(path);
-            string imagePath = currentDir + "\\" + currentFileName;
-            LogWritter.write("Get path:" + imagePath);
-
-            return imagePath;
-        }
-
-
-        private void ListDirectory()
+        //ディレクトリ情報をリスト化
+        private void ListDirectory(String directroy)
         {
             directryListInfo.Clear();
-            foreach (string f in Directory.GetFileSystemEntries(currentDir))
+            dirList.Clear();
+            List<VirtualFileInfo> list = new List<VirtualFileInfo>();
+            foreach (string f in Directory.GetFileSystemEntries(directroy))
             {
-                directryListInfo.Add(new VirtualFileInfo(f, 0));
+                VirtualFileInfo info = new VirtualFileInfo(f, 0);
+                directryListInfo.Add(info);
+                if (info.Type == FileType.File)
+                {
+                    list.Add(info);
+                } else if (info.Type == FileType.Directory)
+                {
+                    dirList.Add(info);
+                }
             }
             FileSort.Sort(ref directryListInfo, loadOption.sortOption);
-            infos = directryListInfo.ToArray();
+            FileSort.Sort(ref list, loadOption.sortOption);
+            FileSort.Sort(ref dirList, loadOption.sortOption);
+            infos = list.ToArray();          
+            dirInfos = dirList.ToArray();
         }
 
-        public void SearchDirectry(String path)
-        {
-            SearchDirectry(path, false, 0);
-
-        }
-
-
-        public string GetParent(string path,int step)
+        //親ディレクトリを取得 =0 current -1 previous +1 next
+        public string GetParent(string path, int step)
         {
             String dir = path;
 
-            if(dirList != null)
+            if (Parent != null)
             {
-                parentDirPos += step;
-                if (parentDirPos > 0 && parentDirPos < dirInfos.Length)
+
+                Parent.dirPos += step;
+                if (Parent.dirPos < 0)
                 {
-                    return dirList[parentDirPos].DirectoryFullName;
+                    Parent.dirPos = Parent.dirInfos.Length - 1;
                 }
-                return null;
-            }
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(dir);
-            if (directoryInfo.FullName == null) return null;
-
-            if (System.IO.Directory.Exists(path))
-            {
-                currentFileName = path.Substring(path.TrimEnd('\\').LastIndexOf('\\')).Trim('\\');
-                currentDir = path.Substring(0,path.TrimEnd('\\').LastIndexOf('\\')).TrimEnd('\\');
+                if (Parent.dirPos > Parent.dirInfos.Length - 1)
+                {
+                    Parent.dirPos = 0;
+                }
 
             }
             else
             {
-                currentDir = directoryInfo.Parent.FullName;
-                currentFileName = directoryInfo.Name;
-            }
 
+                Parent = new VirtualFileList(loadOption);
+                Parent.SearchDirectry(infos[currentPos].Parent);
 
-            ListDirectory();
+                LogWritter.write("#" + Parent.dirPos + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
 
-            dirList = new List<VirtualFileInfo>();
-            foreach (VirtualFileInfo info in infos)
-            {
-                if (info.Type == FileType.Directory)
+                DirectoryInfo directoryInfo = new DirectoryInfo(dir);
+                if (directoryInfo.FullName == null) return null;
+
+                if (step >= 0)
                 {
-                    dirList.Add(info);
-
+                    if (step >= Parent.infos.Length) step = Parent.infos.Length - 1;
+                    Parent.dirPos = step;
                 }
-            }
-            dirInfos = dirList.ToArray();
-            int j = 0, pos = 0;
-            foreach (VirtualFileInfo info in dirInfos)
-            {
-                if (info.Name.Equals(currentFileName))
+                else
                 {
-                    pos = j;
+                    if (step >= Parent.infos.Length) step = 0;
+                    Parent.dirPos = Parent.infos.Length - step;
                 }
-                j++;
+
             }
-
-            pos += step;
-
-            if (pos > dirInfos.Length - 1) pos = 0;
-            if (pos < 0) pos = dirInfos.Length - 1;
-
-            parentLength = dirInfos.Length;
-            parentDirPos = pos;
-
-            return dirInfos[pos].DirectoryFullName;
+            LogWritter.write("#" + Parent.dirPos + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
+            return Parent.GetDirectory();
         }
 
-        public void SearchDirectry(string path,bool option, int step)
-        {
 
+        public string GetDirectory()
+        {
+            return dirInfos[dirPos].DirectoryFullName;
+        }
+
+
+
+        //option false => 同じフォルダ
+        //option true => フォルダをstep移動
+
+        public string SearchDirectry(string path, bool option, int step)
+        {
             if (option)
             {
-                string p = GetParent(path, step);
-                if (p == null) return;
-                SearchDirectry(p, false, 0);
-                return;
+                String str = GetParent(path, step);
+                if (str == null)
+                {
+                    return null;
+                }
+                
+                return SearchDirectry(str, false, 0);
             }
-            else
             if (File.Exists(path))
             {
                 LogWritter.write("Drop File is exist.");
 
                 currentFileName = Path.GetFileName(path);
                 currentDir = Path.GetDirectoryName(path);
+                currentFullName = Path.Combine(currentFileName,currentDir);
 
             }
             else if (Directory.Exists(path))
@@ -231,119 +232,146 @@ namespace IVWIN
                 LogWritter.write("Drop file is directry");
                 currentDir = path;
                 currentFileName = null;
+                currentFullName = path;
             }
             else
             {
-                return;
+                return null;
             }
 
-            ListDirectory();
+            ListDirectory(currentDir);
 
             int i = 0;
+
             foreach (VirtualFileInfo info in infos)
             {
                 if (info.Name.Equals(currentFileName))
                 {
-                     currentDirPos = i;
-                     break;
+                    currentPos = i;
+                    break;
                 }
                 i++;
             }
 
+
             if (currentFileName == null)
             {
-                currentDirPos = 0;
-                if (infos.Length > 0)
-                {
-                    currentFileName = infos[0].Name;
-                }
-                else
+                currentPos = 0;
+                string str = SetCurrentPos(0);
+                if (str == null)
                 {
                     LogWritter.write("This Directry is empty.");
                     currentFileName = null;
+                    return null;
                 }
             }
-            nowpos = currentDirPos;
-            LogWritter.write("Set current path is " + currentDir);
-            LogWritter.write("Set current file is " + currentFileName);
+
+            nowpos = currentPos;
+            string imagePath =Path.Combine( currentDir , currentFileName);
+            return imagePath;
         }
 
-
-        public void MarkDirectoryOffset()
+        public string GetNextPath(bool flag)
         {
-            this.nowpos = currentDirPos;
-        }
-
-        private bool isLooped = false;
-
-        public string GetNextPath()
-        {
-            int i = currentDirPos;
+            int i = currentPos;
+            int old = currentPos;
             isLooped = false;
             do
             {
                 i++;
-                if (i == nowpos) { isLooped = true; return null; }
                 if (i >= infos.Length)
                 {
+                    if (!flag) { i = infos.Length - 1; return null; }
                     i = 0;
-                    if (loadOption.isDirectoryMove)
+                    if (loadOption.isDirectoryMove && flag)
                     {
-                        string path = currentDir + "\\" + currentFileName;
-                        if (Directory.Exists(path) ) {
-                            path = currentDir;
-                        }
-                        SearchDirectry(infos[currentDirPos].DirectoryFullName, true, +1);
-                        currentDirPos = 0;
-                        i = currentDirPos;
-                        nowpos = currentDirPos;
-                    }
-                    else
-                    {
-                        currentDirPos = 0;
-                    }
-                }
-            } while (infos[i].Type != FileType.File);
-            currentDirPos = i;
-            currentFileName = infos[currentDirPos].Name;
-            string imagePath = currentDir + "\\" + currentFileName;
-            return imagePath;
-        }
-
-        public string GetPreviousPath()
-        {
-            int i = currentDirPos;
-            do
-            {
-                i--;
-                if (i == nowpos) { isLooped = true; return null; }
-                if (i < 0)
-                {
-                    i = infos.Length -1;
-                    if (loadOption.isDirectoryMove)
-                    {
-                        string path = currentDir + "\\" + currentFileName;
+                        string name = (currentFileName != null) ? currentFileName : "";
+                        string path = Path.Combine(currentDir , name);
                         if (Directory.Exists(path))
                         {
                             path = currentDir;
                         }
-                        SearchDirectry(infos[currentDirPos].DirectoryFullName,true, -1);
-
-                        if (parentDirPos < 0) return null;
-                        currentDirPos = infos.Length -1;
-                        i = currentDirPos;
-                        nowpos = currentDirPos;
+                        do
+                        {
+                            currentFullName = SearchDirectry(currentDir, true, +1);
+                        } while (currentFullName == null);
+                        currentPos = 0;
+                        i = currentPos;
+                        nowpos = currentPos;
                     }
                     else
                     {
-                        currentDirPos = 0;
+                        currentPos = 0;
                     }
                 }
             } while (infos[i].Type != FileType.File);
-            currentDirPos = i;
-            currentFileName = infos[currentDirPos].Name;
-            string imagePath = currentDir + "\\" + currentFileName;
+            currentPos = flag ? i : old;
+            currentFileName = infos[currentPos].Name;
+            string imagePath = Path.Combine(currentDir, infos[i].Name);
             return imagePath;
+        }
+
+        public string GetPreviousPath(bool flag)
+        {
+            int i = currentPos;
+            int old = currentPos;
+            do
+            {
+                i--;
+                //              if (i == nowpos) { isLooped = true; return null; }
+                if (i < 0)
+                {
+                    if (!flag) { i = 0; return null; }
+                    i = infos.Length - 1;
+                    if (loadOption.isDirectoryMove && flag)
+                    {
+                        string name = (currentFileName != null) ? currentFileName : "";
+                        string path = Path.Combine(currentDir, name);
+                        if (Directory.Exists(path))
+                        {
+                            path = currentDir;
+                        }
+                        do
+                        {
+                            currentFullName = SearchDirectry(currentDir, true, -1);
+                        } while (currentFullName == null);
+                        if (Parent.dirPos < 0) return null;
+                        currentPos = infos.Length - 1;
+                        i = currentPos;
+                        nowpos = currentPos;
+                    }
+                    else
+                    {
+                        currentPos = 0;
+                    }
+                }
+            } while (infos[i].Type != FileType.File);
+            currentPos = flag ? i : old;
+            return GetCurrentFullName();
+        }
+
+        public string GetImagePath(string path)
+        {
+            SearchDirectry(path);
+            string imagePath = Path.Combine(currentDir,currentFileName);
+            return imagePath;
+        }
+
+        private bool isLooped = false;
+
+
+        public string SearchDirectry(int step)
+        {
+            string imagePath = Path.Combine(currentDir, currentFileName);
+            return SearchDirectry(imagePath,true, step);
+
+        }
+
+
+        public string SearchDirectry(String path)
+        {
+            return SearchDirectry(path, false, 0);
+
         }
 
         public bool GetLooped()
@@ -351,5 +379,109 @@ namespace IVWIN
 
             return isLooped;
         }
+
+        public string GetCurrentFullName()
+        {
+            currentFileName = infos[currentPos].Name;
+            currentDir = infos[currentPos].DirectoryFullName;
+            currentFullName = Path.Combine(currentDir, currentFileName);
+            return currentFullName;
+        }
+
+        internal string SetCurrentPos(int pos)
+        {
+            if (infos.Length < 1) return null;
+            if (pos > infos.Length) pos = 0;
+            if (pos < 0) pos = infos.Length - 1;
+            currentPos = pos;
+            currentFileName = infos[pos].Name;
+            while (infos[pos].Type != FileType.File)
+            {
+                pos++;
+                if (pos >= infos[pos].Length) return null;
+                currentPos = pos;
+            }
+            return GetCurrentFullName();
+        }
+    }
+
+
+    public class FileManager
+    {
+        private string path;
+        private LoadOption loadOption;
+        private VirtualFileList list;
+       
+        public string imagePath;
+
+        public FileManager(string path,LoadOption loadOption)
+        {
+            this.path = path;
+            this.loadOption = loadOption;
+            list = new VirtualFileList(loadOption);
+            imagePath = list.GetImagePath(path);
+        }
+
+        internal string GetImagePath(string imagePath)
+        {
+            imagePath = list.GetImagePath(imagePath);
+            return imagePath;
+        }
+
+        //false = ファイル位置（ポインタ）を移動しないで、次／前のファイルを返す
+        //true = ファイル位置（ポインタ）を移動して、次／前のファイルを返す
+
+        internal string GetPreviousPath(bool flag)
+        {
+            imagePath = list.GetPreviousPath(flag);
+            return imagePath;
+        }
+
+        internal string GetNextPath(bool flag)
+        {
+            imagePath = list.GetNextPath(flag);
+            return imagePath;
+        }
+
+        internal string GetPreviousPath()
+        {
+            imagePath = list.GetPreviousPath(true);
+            return imagePath;
+        }
+
+        internal string GetNextPath()
+        {
+            imagePath = list.GetNextPath(true);
+            return imagePath;
+        }
+
+        internal void SetCurrentPath(string path)
+        {
+            list.SearchDirectry(path);
+            imagePath = path;
+        }
+
+        internal string GetPathFormPos(int pos)
+        {
+            if (pos < 0) pos = list.infos.Length -1;
+            if (pos > list.infos.Length) pos = 0;
+            imagePath = list.SetCurrentPos(pos);
+            return imagePath;
+        }
+
+        internal string GetNextFolderFile()
+        {
+            list.SearchDirectry(+1);
+            imagePath = list.GetNextPath(true);
+            return imagePath;
+        }
+
+        internal string GetPreviousFolderFile()
+        {
+            list.SearchDirectry(-1);
+            imagePath = list.GetPreviousPath(true);
+            return imagePath;
+        }
+
     }
 }

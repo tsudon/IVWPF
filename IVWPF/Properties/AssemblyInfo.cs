@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("IVWPF")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("tsudon")]
 [assembly: AssemblyProduct("IVWPF")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
