@@ -22,5 +22,14 @@ namespace IVWPF.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DefaultFolder {
+            get {
+                return ((string)(this["DefaultFolder"]));
+            }
+        }
     }
 }
