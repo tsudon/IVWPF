@@ -1,0 +1,14 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IVWPF"
+        xmlns:IVWIN="clr-namespace:IVWIN" x:Class="IVWPF.DebugWindow"
+        mc:Ignorable="d"
+        Title="DebugWindow" Height="476" Width="640" WindowStyle="ToolWindow">
+    <Grid x:Name="grid">
+        <TextBox x:Name="Logger" Margin="0" TextWrapping="Wrap" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" Background="Black" Foreground="White" CaretBrush="Black" OpacityMask="Black" BorderBrush="{x:Null}" IsReadOnly="True" Text="" >
+        </TextBox>
+    </Grid>
+</Window>

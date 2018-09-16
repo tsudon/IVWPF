@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Collections.ObjectModel;
 using IVWIN;
 using System.Windows.Media.Animation;
+using System.Threading.Tasks;
 
 namespace IVWPF
 
@@ -17,129 +18,27 @@ namespace IVWPF
     /*Loaderの本体 フォームから分離する */
 
 
-    public class BitmapCache
-    {
-        private int CacheSize,NextCacheSize,PreviousCacheSize,Loaded,PreLoaded;
-        private int offset = 0;
-        string[] pathes;
-        private BitmapDecoder[] sources;
-
-        public BitmapCache(int nextCacheSize,int previousCacheSize)
-        {
-            NextCacheSize = nextCacheSize;
-            PreviousCacheSize = previousCacheSize;
-            CacheSize = nextCacheSize + previousCacheSize + 1;
-            sources = new BitmapDecoder[CacheSize];
-            pathes = new string[CacheSize];
-            Loaded = 0;
-            PreLoaded = 0;
-        }
-
-        public BitmapDecoder GetNextCache()
-        {
-            int i = offset;
-            offset++;
-            if (offset >= CacheSize - 1) offset = 0;
-            if (sources[offset] == null || Loaded == 0)
-            {
-                offset = i;
-                return null;
-            }
-            if (Loaded > 0)
-            {
-                Loaded--;
-                PreLoaded++;
-                if (PreLoaded > PreviousCacheSize) PreLoaded = PreviousCacheSize;
-            }
-            return sources[offset];
-        }
-
-        public BitmapDecoder GetPreviousCache()
-        {
-            int i = offset;
-            offset--;
-            if (offset < 0) offset = CacheSize;
-            if (sources[offset] == null || PreLoaded ==0)
-            {
-                offset = i;
-                return null;
-            }
-            if (PreLoaded > 0)
-            {
-                PreLoaded--;
-                if (Loaded < NextCacheSize) Loaded++;
-            }
-            return sources[offset];
-        }
-
-        public BitmapDecoder GetCache(string path)
-        {
-            int i = 0;
-            foreach (string p in pathes)
-            {
-                if(p == path)
-                {
-                    int delta = offset - i;
-                    if (delta < 0) delta += CacheSize;
-
-                    Loaded -= delta;
-                    if (Loaded < 0) Loaded = 0;
-                    if (Loaded > NextCacheSize) Loaded = NextCacheSize;
-
-                    offset = i;
-                    return sources[i];
-                }
-                i++;
-            }
-            return null;
-        }
-
-
-        public void AddNextCache(BitmapDecoder decoder)
-        {
-            if (decoder == null) return;
-            if (Loaded >= NextCacheSize) return;
-            sources[offset + Loaded] = decoder;
-            Loaded++;
-        }
-
-        public void Clear()
-        {
-            for(int i=0; i < sources.Length; i++)
-            {
-                sources[i] = null;
-                pathes[i] = null;
-                Loaded = 0;
-                PreLoaded = 0;
-            }
-
-        }
-    }
-
-
-
     class Loader
     {
         private double offsetX = 0, offsetY = 0;
         public LoadOption loadOption;                    //image browser option
-        private BitmapSource bmp; 
-        public Image Image{ get; private set;}
+        private BitmapSource bmp;
+        public Image Image { get; private set; }
         private int frameCount, framePos = 0;
         private ReadOnlyCollection<BitmapFrame> bitmapFrames;
         private bool isAnimation = false;
+        private bool isMultiFrame = false;
         double scaleX = 1.0, scaleY = 1.0;
         private FileManager manager;
-        private BitmapCache cache;
-        private int nextCacheSize = 4;
-        private int previousCacheSize = 2;
-        private int preLoaded = 0;
+
         private string currentPath;
+        static internal string[] args;
 
-        public Loader(String imagePath)
+
+        public Loader(string imagePath, Image image)
         {
-
+            this.Image = image;
             loadOption = new LoadOption();
-            cache = new BitmapCache(nextCacheSize, previousCacheSize);
 
             if (imagePath != null)
             {
@@ -147,42 +46,14 @@ namespace IVWPF
             }
         }
 
-        public void SetImage(Image image)
-        {
-            this.Image = image;
-        }
-
-        public bool Load(string imagePath)
+        public void Load(string imagePath)
         {
             manager = new FileManager(imagePath, loadOption);
-            preLoaded = 0;
-            bool ret = PaintPicture(manager.GetImagePath(imagePath));
-            for (int i = 0; i < nextCacheSize; i++)
-            {
-                GetCachePicture(manager.GetNextPath(false));
-            }
-            return ret;
+            PaintPicture(manager.GetImagePath(imagePath));
+
         }
 
 
-        public bool GetCachePicture(string imagePath)
-        {
-            if (preLoaded > nextCacheSize || imagePath == null) return false;
-            try
-            {
-                Uri uri = new Uri(imagePath);
-                BitmapDecoder decoder = BitmapDecoder.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.Default);
-                cache.AddNextCache(decoder);
-                bitmapFrames = decoder.Frames;
-            }
-            catch (Exception e)
-            {
-                LogWritter.write(e.ToString());
-                return false;
-            }
-            preLoaded ++;
-            return true;
-        }
 
 
         private BitmapDecoder GetDecoderFromPath(string path)
@@ -190,43 +61,60 @@ namespace IVWPF
             try
             {
                 if (path == null) return null;
-                BitmapDecoder decoder = cache.GetCache(path);
-                if (decoder == null)
-                {
-                    Uri uri = new Uri(path);
-                    decoder = BitmapDecoder.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.Default);
-                    cache.AddNextCache(decoder);
-                }
+                Uri uri = new Uri(path);
+                BitmapDecoder decoder = BitmapDecoder.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.Default);
                 return decoder;
             } catch (Exception e)
             {
-                LogWritter.write(e.ToString());
+                LogWriter.write(e.ToString());
                 return null;
             }
         }
 
         private bool isManga = false;
 
-        public bool PaintPicture(string imagePath)
+        public void PaintPicture(string imagePath)
         {
             try
             {
-                BitmapDecoder decoder = GetDecoderFromPath(imagePath);
-                bitmapFrames = decoder.Frames;
-                frameCount = decoder.Frames.Count;
+                LocalDecoder decoder;
+                if (Path.GetExtension(imagePath) == ".zip")
+                {
+                    decoder = GetDecoderFromZip(imagePath);
+                    bitmapFrames = decoder.Frames;
+                    frameCount = decoder.Frames.Count;
+                }
+                else
+                {
+                    BitmapDecoder bitmapDecoder = GetDecoderFromPath(imagePath);
+                    decoder = LocalDecoder.TransrateBitmapDecoderToLocal(bitmapDecoder);
+                    bitmapFrames = decoder.Frames;
+                    frameCount = decoder.Frames.Count;
+                }
                 framePos = 0;
                 isManga = false;
-
+                isAnimation = false;
                 bmp = bitmapFrames[0];
 
 
                 Clear();
+
                 if (frameCount > 1 && loadOption.isAnimate)
                 {
-                    if (decoder.Metadata.Format == "gif") PaintAnimationGIF(decoder);
+                    if (decoder.Metadata != null && decoder.Metadata.Format == "gif") isAnimation = true;
+                    if (decoder.IsAnimation) isAnimation = true;
+                }
+
+
+                if (isAnimation)
+                {
+                    if (decoder.Metadata != null && decoder.Metadata.Format == "gif") PaintAnimationGIF(decoder);
+                    else if (decoder.IsUgoira) PaintAnimationUgoira(decoder);
+                    else PaintAnimation(decoder);
                 }
                 else
                 {
+                    if (decoder.Frames.Count > 1) isMultiFrame = true;
                     isAnimation = false;
                     if (loadOption.isMangaMode == false)
                     {
@@ -237,13 +125,24 @@ namespace IVWPF
                     {
 
                         String path = manager.GetNextPath(false);
+                        if (Path.GetExtension(imagePath) == ".zip")
+                        {
+                            RePaintPicture(bmp);
+                            Image.Source = bmp;
+                            currentPath = imagePath;
+                            return;
+                        }
 
                         BitmapDecoder decoder2 = GetDecoderFromPath(path);
 
-                        if (decoder2 != null)
+                        if (decoder2 != null && decoder2.Frames.Count == 1
+                            && decoder2.Frames[0].PixelHeight > decoder2.Frames[0].PixelWidth
+                            && bmp.PixelHeight > bmp.PixelWidth 
+                            && (decoder2.Frames[0].PixelHeight >= bmp.PixelHeight * 0.8) 
+                            && (decoder2.Frames[0].PixelHeight <= bmp.PixelHeight * 1.2))
                         {
 
-                            if (Image.MinWidth >= Image.MinHeight && bmp.PixelWidth < bmp.PixelHeight) {
+                            if (Image.MinWidth >= Image.MinHeight) {
                                 if (decoder2.Frames.Count == 1 || loadOption.isAnimate != false)
                                 {
                                     BitmapSource bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
@@ -260,12 +159,12 @@ namespace IVWPF
                                     if (aspect > aspectSrc)
                                     {
                                         manager.GetNextPath();
-                                        WriteableBitmap wbmp = new WriteableBitmap(width, height, 96.0 , 96.0, PixelFormats.Bgra32, null);
+                                        WriteableBitmap wbmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgra32, null);
                                         byte[] buf0 = new byte[bmp0.PixelWidth * bmp0.PixelHeight * 4];
                                         byte[] buf1 = new byte[bmp1.PixelWidth * bmp1.PixelHeight * 4];
                                         bmp0.CopyPixels(buf0, bmp0.PixelWidth * 4, 0);
                                         bmp1.CopyPixels(buf1, bmp1.PixelWidth * 4, 0);
-                                        wbmp.WritePixels(new Int32Rect(0,offsetY1, bmp1.PixelWidth, bmp1.PixelHeight), buf1, bmp1.PixelWidth * 4, 0);
+                                        wbmp.WritePixels(new Int32Rect(0, offsetY1, bmp1.PixelWidth, bmp1.PixelHeight), buf1, bmp1.PixelWidth * 4, 0);
                                         wbmp.WritePixels(new Int32Rect(bmp1.PixelWidth, offsetY0, bmp0.PixelWidth, bmp0.PixelHeight), buf0, bmp0.PixelWidth * 4, 0);
                                         wbmp.Freeze();
                                         isManga = true;
@@ -282,15 +181,31 @@ namespace IVWPF
             }
             catch (Exception e)
             {
-                LogWritter.write(e.Message);
-                return false;
+                LogWriter.write(e.Message);
             }
-            return true;
+        }
+
+        private LocalDecoder GetDecoderFromZip(string imagePath)
+        {
+            try
+            {
+                return new ZipImageDecoder(imagePath);
+            }
+            catch (Exception e)
+            {
+                LogWriter.write(e.ToString());
+                return null;
+            }
+        }
+
+        internal void OptionSave()
+        {
+            loadOption.Save();
         }
 
         public void SetMangaMode(bool flag)
         {
-            if(loadOption.isMangaMode != flag)
+            if (loadOption.isMangaMode != flag)
             {
                 loadOption.isMangaMode = flag;
                 manager.SetCurrentPath(currentPath);
@@ -321,7 +236,7 @@ namespace IVWPF
 
         public void RePaintPicture(BitmapSource bmp)
         {
-            RePaintPicture(bmp,false);
+            RePaintPicture(bmp, false);
         }
 
         struct GetScaleValue
@@ -329,16 +244,16 @@ namespace IVWPF
             public double scaleX;
             public double scaleY;
             public int resizeWidth;
-            public int resizeHight;         
+            public int resizeHight;
 
         }
 
 
-        private GetScaleValue GetScale (int imgWidth, int imgHeight, int width, int height,double dpiX,double dpiY)
+        private GetScaleValue GetScale(int imgWidth, int imgHeight, int width, int height, double dpiX, double dpiY)
         {
             double scaleX = 1.0;
             double scaleY = 1.0;
-            int resizeWidth = imgWidth, resizeHeight =imgHeight;
+            int resizeWidth = imgWidth, resizeHeight = imgHeight;
             switch (loadOption.drawMode)
             {
                 case DrawMode.DEFALT:
@@ -386,7 +301,7 @@ namespace IVWPF
                     break;
             }
 
-            double dpix = (bmp.DpiX == 0 )? 96.0 : bmp.DpiX;    //bitmap Dpiが 0の時の対策
+            double dpix = (bmp.DpiX == 0) ? 96.0 : bmp.DpiX;    //bitmap Dpiが 0の時の対策
             double dpiy = (bmp.DpiY == 0) ? 96.0 : bmp.DpiY;
 
 
@@ -405,7 +320,7 @@ namespace IVWPF
 
 
 
-        public void PaintAnimationGIF(BitmapDecoder decoder)
+        public void PaintAnimationGIF(LocalDecoder decoder)
         {
             frameCount = decoder.Frames.Count;
             framePos = 0;
@@ -418,7 +333,7 @@ namespace IVWPF
             int imgHeight = bmp.PixelHeight;
 
             ObjectAnimationUsingKeyFrames animation = new ObjectAnimationUsingKeyFrames();
-            LogWritter.write("This File is Animation GIF.");
+            LogWriter.write("This File is Animation GIF.");
             isAnimation = true;
 
             long time = 0;
@@ -426,7 +341,7 @@ namespace IVWPF
 
             byte[] imgBuffer = new byte[imgWidth * imgHeight];
 
-            WriteableBitmap wbmp = new WriteableBitmap(imgWidth, imgHeight, bmp.DpiX, bmp.DpiY,bmp.Format, bmp.Palette);
+            WriteableBitmap wbmp = new WriteableBitmap(imgWidth, imgHeight, bmp.DpiX, bmp.DpiY, PixelFormats.Indexed8, bmp.Palette);
 
             GetScaleValue v = GetScale(imgWidth, imgHeight, width, height, bmp.DpiX, bmp.DpiY);
             scaleX = v.scaleX;
@@ -436,13 +351,25 @@ namespace IVWPF
 
             if (bmp.Format != PixelFormats.Indexed8)
             {
-                bmp = new FormatConvertedBitmap(bmp,PixelFormats.Indexed8,null,0);
+                bmp = new FormatConvertedBitmap(bmp, PixelFormats.Indexed8, null, 0);
                 bmp.Freeze();
             }
- 
+
+            offsetX = (width - resizeWidth) / 2.0;
+            offsetY = (height - resizeHeight) / 2.0;
+
+            TransformGroup transforms = new TransformGroup();
+            transforms.Children.Add(new ScaleTransform(scaleX, scaleY));
+            Matrix matrix = new Matrix(1, 0, 0, 1, offsetX, offsetY);
+            transforms.Children.Add(new MatrixTransform(matrix));
+            Image.RenderTransform = transforms;
+
+            Image.Source = bmp;
+
             byte[] buf = new byte[imgWidth * imgHeight];
             bmp.CopyPixels(buf, imgWidth, 0);
             wbmp.WritePixels(new Int32Rect(0, 0, imgWidth, imgHeight), buf, imgWidth, 0);
+
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -450,9 +377,9 @@ namespace IVWPF
                 int transpearentColor = 0;
                 BitmapMetadata metadata = fbmp.Metadata as BitmapMetadata;
                 bool transpearent = false, hasLocalPalette = false;
-                int delay = 0,startX=0,startY=0,w=imgWidth,h=imgHeight;
+                int delay = 0, startX = 0, startY = 0, w = imgWidth, h = imgHeight;
 
-                BitmapPalette palette = bmp.Palette ;
+                BitmapPalette palette = bmp.Palette;
 
                 if (metadata != null)
                 {
@@ -475,7 +402,7 @@ namespace IVWPF
                     }
                     catch
                     {
-                        LogWritter.write("Query Error");
+                        LogWriter.write("Query Error");
                         //no data
                     }
                 }
@@ -483,28 +410,28 @@ namespace IVWPF
 
                 if (fbmp.Format != PixelFormats.Indexed8)
                 {
-                    fbmp = new FormatConvertedBitmap(fbmp,PixelFormats.Indexed8,null,0);
+                    fbmp = new FormatConvertedBitmap(fbmp, PixelFormats.Indexed8, null, 0);
                     fbmp.Freeze();
                 }
 
-                byte[] fbuf = new byte[w*h];
+                byte[] fbuf = new byte[w * h];
                 fbmp.CopyPixels(fbuf, w, 0);
 
                 if (transpearent)
                 {
-                     for (int y = 0; y < h; y++)
-                      {
-                            int srcOffset = y * w;
-                            int destOffset = (startY + y) * imgWidth + startX;
-                            for (int x = 0; x < w; x++)
+                    for (int y = 0; y < h; y++)
+                    {
+                        int srcOffset = y * w;
+                        int destOffset = (startY + y) * imgWidth + startX;
+                        for (int x = 0; x < w; x++)
+                        {
+                            if (transpearentColor != fbuf[srcOffset + x])
                             {
-                                if (transpearentColor != fbuf[srcOffset + x])
-                                {
-                                    buf[destOffset + x] = fbuf[srcOffset + x];
-                                }
+                                buf[destOffset + x] = fbuf[srcOffset + x];
                             }
+                        }
 
-                     }
+                    }
                 }
                 else
                 {
@@ -512,38 +439,185 @@ namespace IVWPF
                     {
                         int srcOffset = y * w;
                         int destOffset = (y + startY) * imgWidth + startX;
-                        Array.Copy(fbuf,srcOffset, buf,destOffset, w);
+                        Array.Copy(fbuf, srcOffset, buf, destOffset, w);
                     }
 
                 }
 
 
-                WriteableBitmap wfbmp = new WriteableBitmap(imgWidth, imgHeight, bmp.DpiX, bmp.DpiY, bmp.Format, palette);
+                WriteableBitmap wfbmp = new WriteableBitmap(imgWidth, imgHeight, bmp.DpiX, bmp.DpiY, PixelFormats.Indexed8, palette);
                 wfbmp.WritePixels(new Int32Rect(0, 0, imgWidth, imgHeight), buf, imgWidth, 0);
 
                 DiscreteObjectKeyFrame key = new DiscreteObjectKeyFrame();
                 key.KeyTime = new TimeSpan(time);
-//                key.Value = bitmapFrames[i];
+                //                key.Value = bitmapFrames[i];
                 key.Value = wfbmp;
                 animation.KeyFrames.Add(key);
                 time += delay * span;
+
+
+
             }
             animation.RepeatBehavior = RepeatBehavior.Forever;
             animation.Duration = new TimeSpan(time);
 
-            offsetX = (width - resizeWidth) / 2.0;
-            offsetY = (height - resizeHeight) / 2.0;
-
-            TransformGroup transforms = new TransformGroup();
-            transforms.Children.Add(new ScaleTransform(scaleX, scaleY));
-            Matrix matrix = new Matrix(1, 0, 0, 1, offsetX, offsetY);
-            transforms.Children.Add(new MatrixTransform(matrix));
             Image.RenderTransform = transforms;
+            Image.BeginAnimation(Image.SourceProperty, animation);
 
             Image.Source = bmp;
-            Image.BeginAnimation(Image.SourceProperty, animation);
         }
 
+        public void PaintAnimationUgoira(LocalDecoder decoder)
+        {
+            try
+            {
+
+                frameCount = decoder.Frames.Count;
+                framePos = 0;
+                bitmapFrames = decoder.Frames;
+                bmp = decoder.Frames[0];
+
+                int width = (int)Image.MinWidth;
+                int height = (int)Image.MinHeight;
+                int imgWidth = bmp.PixelWidth;
+                int imgHeight = bmp.PixelHeight;
+
+                ObjectAnimationUsingKeyFrames animation = new ObjectAnimationUsingKeyFrames();
+
+                isAnimation = true;
+
+                long time = 0;
+                long span = 1000 * 10;
+
+
+                GetScaleValue v = GetScale(imgWidth, imgHeight, width, height, bmp.DpiX, bmp.DpiY);
+                scaleX = v.scaleX;
+                scaleY = v.scaleY;
+                int resizeWidth = v.resizeWidth;
+                int resizeHeight = v.resizeHight;
+
+
+                for (int i = 0; i < frameCount; i++)
+                {
+                    BitmapSource wbmp = bitmapFrames[i];
+                    int delay = 33, w = imgWidth, h = imgHeight;
+
+                    if (decoder.Delays != null)
+                    {
+                        delay = decoder.Delays[i];
+
+                    }
+
+                    DiscreteObjectKeyFrame key = new DiscreteObjectKeyFrame();
+                    key.KeyTime = new TimeSpan(time);
+                    key.Value = wbmp;
+                    animation.KeyFrames.Add(key);
+                    time += delay * span;
+
+                }
+                animation.RepeatBehavior = RepeatBehavior.Forever;
+                animation.Duration = new TimeSpan(time);
+
+                offsetX = (width - resizeWidth) / 2.0;
+                offsetY = (height - resizeHeight) / 2.0;
+
+                TransformGroup transforms = new TransformGroup();
+                transforms.Children.Add(new ScaleTransform(scaleX, scaleY));
+                Matrix matrix = new Matrix(1, 0, 0, 1, offsetX, offsetY);
+                transforms.Children.Add(new MatrixTransform(matrix));
+                Image.RenderTransform = transforms;
+
+                Image.Source = bmp;
+                Image.BeginAnimation(Image.SourceProperty, animation);
+
+
+            }
+            catch (Exception e)
+            {
+                LogWriter.write(e.ToString());
+            }
+        }
+
+        public void PaintAnimation(LocalDecoder decoder)
+        {
+            try
+            {
+
+                frameCount = decoder.Frames.Count;
+                framePos = 0;
+                bitmapFrames = decoder.Frames;
+                bmp = decoder.Frames[0];
+
+                int width = (int)Image.MinWidth;
+                int height = (int)Image.MinHeight;
+                int imgWidth = bmp.PixelWidth;
+                int imgHeight = bmp.PixelHeight;
+
+                ObjectAnimationUsingKeyFrames animation = new ObjectAnimationUsingKeyFrames();
+
+                isAnimation = true;
+
+                long time = 0;
+                long span = 1000 * 10;
+
+
+                GetScaleValue v = GetScale(imgWidth, imgHeight, width, height, bmp.DpiX, bmp.DpiY);
+                scaleX = v.scaleX;
+                scaleY = v.scaleY;
+                int resizeWidth = v.resizeWidth;
+                int resizeHeight = v.resizeHight;
+
+                RenderTargetBitmap rbmp = new RenderTargetBitmap(imgWidth, imgHeight, bmp.DpiX, bmp.DpiY, PixelFormats.Pbgra32);
+
+                for (int i = 0; i < frameCount; i++)
+                {
+                    BitmapSource fbmp = bitmapFrames[i];
+                    BitmapMetadata metadata = fbmp.Metadata as BitmapMetadata;
+                    int delay = 33, startX = 0, startY = 0, w = imgWidth, h = imgHeight;
+
+                    if (decoder.Delays != null)
+                    {
+                        delay = decoder.Delays[i];
+
+                    }
+
+                    DrawingVisual drawingVisual = new DrawingVisual();
+                    DrawingContext drawingContext = drawingVisual.RenderOpen();
+                    drawingContext.DrawImage(fbmp, new Rect(startX, startY, w, h));
+                    drawingContext.Close();
+                    rbmp.Render(drawingVisual);
+
+                    BitmapSource wbmp = rbmp.Clone();
+
+                    DiscreteObjectKeyFrame key = new DiscreteObjectKeyFrame();
+                    key.KeyTime = new TimeSpan(time);
+                    key.Value = wbmp;
+                    animation.KeyFrames.Add(key);
+                    time += delay * span;
+
+                }
+                animation.RepeatBehavior = RepeatBehavior.Forever;
+                animation.Duration = new TimeSpan(time);
+
+                offsetX = (width - resizeWidth) / 2.0;
+                offsetY = (height - resizeHeight) / 2.0;
+
+                TransformGroup transforms = new TransformGroup();
+                transforms.Children.Add(new ScaleTransform(scaleX, scaleY));
+                Matrix matrix = new Matrix(1, 0, 0, 1, offsetX, offsetY);
+                transforms.Children.Add(new MatrixTransform(matrix));
+                Image.RenderTransform = transforms;
+
+                Image.Source = bmp;
+                Image.BeginAnimation(Image.SourceProperty, animation);
+
+
+            }
+            catch (Exception e)
+            {
+                LogWriter.write(e.ToString());
+            }
+        }
 
         public void RePaintPicture(BitmapSource bmp, bool isAnimation)
         {
@@ -574,7 +648,7 @@ namespace IVWPF
             Image.RenderTransform = transforms;
 
 
-            //           if (image == null) LogWritter.write("Image Objects is null");
+            //           if (image == null) LogWriter.write("Image Objects is null");
         }
 
         public void MovePicture(double x, double y)
@@ -607,37 +681,54 @@ namespace IVWPF
         }
 
 
+         private bool MoveFrame(int step) { 
+            framePos+= step;
+            if (framePos < 0 || framePos > bitmapFrames.Count) return false;
+
+            bmp = bitmapFrames[framePos];
+            RePaintPicture(bmp);
+            Image.Source = bmp;
+            return true;
+        }
+
+        private bool MoveFramePos(int pos)
+        {
+            if (framePos < 0 || framePos > bitmapFrames.Count) pos = frameCount -1;
+            bmp = bitmapFrames[framePos];
+            RePaintPicture(bmp);
+            Image.Source = bmp;
+            return true;
+        }
+
         public void NextPiture()
         {
             try
             {
+                if (isMultiFrame)
+                {
+                    if (isManga) MoveFrame(+1);
+                    if (MoveFrame(+1)) return;
+                    isManga = false;
+                }
                 if (isManga)
                 {
                     isManga = false;
                 }
-                bool t = isAnimation;
-                if (frameCount > 1 && framePos < frameCount && !isAnimation)
-                {
-                    framePos++;
-                    bmp = bitmapFrames[framePos];
-                    RePaintPicture(bmp);
-                    Image.Source = bmp;
-                    return;
-                }
+
                 string imagePath = manager.GetNextPath();
                 if (imagePath == null) return;
-                t = PaintPicture(imagePath);
-                if (!isAnimation && t)
+                PaintPicture(imagePath);
+
+                if (!isAnimation)
                 {
                     Image.BeginAnimation(Image.SourceProperty, null);
                     isAnimation = false;
                     frameCount = 0;
                 }
-                if( ! GetCachePicture(manager.GetNextPath(false))) preLoaded --;
             }
             catch(Exception e)
             {
-                LogWritter.write(e.ToString());
+                LogWriter.write(e.ToString());
             }
         }
 
@@ -645,35 +736,31 @@ namespace IVWPF
         {
             try
             {
-                if (isManga)
+                if (isMultiFrame)
                 {
-                    manager.GetPreviousPath();
-
+                    if (isManga) MoveFrame(-1);
+                    if (MoveFrame(-1)) return;
                     isManga = false;
                 }
-                bool t = isAnimation;
+
+                if (isManga)
+                {
+                    isManga = false;
+                    manager.GetPreviousPath();
+                }
                 string imagePath = manager.GetPreviousPath();
+               
                 if (imagePath == null) return;
-
                 PaintPicture(imagePath);
-
-                if (!isAnimation && t)
+                if (!isAnimation)
                 {
                     Image.BeginAnimation(Image.SourceProperty, null);
                     isAnimation = false;
                 }
-
-                if (frameCount > 1 && !isAnimation)
-                {
-                    framePos = frameCount - 1;
-                    bmp = bitmapFrames[framePos];
-                    RePaintPicture(bmp);
-                    Image.Source = bmp;
-                }
             }
             catch (Exception e)
             {
-                LogWritter.write(e.ToString());
+                LogWriter.write(e.ToString());
             }
 
         }
@@ -687,19 +774,21 @@ namespace IVWPF
                 {
                     isManga = false;
                 }
+                if (isMultiFrame)
+                {
+                    MoveFramePos(pos);
+                }
                 if (!isAnimation)
                 {
                     Image.BeginAnimation(Image.SourceProperty, null);
                     isAnimation = false;
                 }
-
-                cache.Clear();
                 String path = manager.GetPathFormPos(pos);
                 PaintPicture(path);
             }
             catch (Exception e)
             {
-                LogWritter.write(e.ToString());
+                LogWriter.write(e.ToString());
             }
 
         }
@@ -717,14 +806,12 @@ namespace IVWPF
                     Image.BeginAnimation(Image.SourceProperty, null);
                     isAnimation = false;
                 }
-
-                cache.Clear();
                 String path = manager.GetNextFolderFile();
                 PaintPicture(path);
             }
             catch (Exception e)
             {
-                LogWritter.write(e.ToString());
+                LogWriter.write(e.ToString());
             }
 
 
@@ -743,14 +830,12 @@ namespace IVWPF
                     Image.BeginAnimation(Image.SourceProperty, null);
                     isAnimation = false;
                 }
-
-                cache.Clear();
                 String path = manager.GetPreviousFolderFile();
                 PaintPicture(path);
             }
             catch (Exception e)
             {
-                LogWritter.write(e.ToString());
+                LogWriter.write(e.ToString());
             }
 
 

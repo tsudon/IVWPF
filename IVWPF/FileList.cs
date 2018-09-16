@@ -24,7 +24,7 @@ namespace IVWIN
         private const string sign = "[\\!\\;\\®µ§»★]";
 
 
-        static public void Sort(ref List<VirtualFileInfo> vs, FileSortOption sortOption) {
+        public static void Sort(ref List<VirtualFileInfo> vs, FileSortOption sortOption) {
 
             switch (sortOption)
             {

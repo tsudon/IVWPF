@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+
 namespace IVWIN
 {
     public enum DrawMode
@@ -30,5 +32,17 @@ namespace IVWIN
         public bool isAnimate = true;
         public FileSortOption sortOption = FileSortOption.SORT_BY_NAME_LOGICAL;
         public bool isDirectoryMove = true;
+        public bool isArchveRead = false;
+        public bool loadPixivAnimation = true;
+
+        public void Save()
+        {
+            Type type = typeof(LoadOption);
+            foreach(FieldInfo info in type.GetFields())
+            {
+                    LogWriter.write(info.Name + " = " + info.GetValue(this));
+            }
+
+        }
     }
 }

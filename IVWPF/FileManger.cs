@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace IVWIN
 {
@@ -53,18 +54,24 @@ namespace IVWIN
                         DirectoryInfo directoryInfo = new DirectoryInfo(DirectoryFullName);
                         Parent = directoryInfo.Parent.FullName;
 
-                        Type = FileType.File;
 
 
                         String ext = info.Extension.ToLower();
-                        if (ext == ".txt" || ext == ".json" || ext == ".text")
+                        Regex regex = new Regex("\\.(bmp|dib|rle|ico|icon|gif|jpeg|jpe|jpg|jfif|exif|png|tiff|tif)$");
+                        if (regex.IsMatch(ext) )
+                        {
+                            Type = FileType.File;
+
+                        }
+                        else if (ext == ".txt" || ext == ".json" || ext == ".text" || ext == ".text")
                         {
                             Type = FileType.InfoText;
                         }
                         else if (ext == ".zip")
                         {
                             Type = FileType.Archive;
-                        }else if (ext == ".ds_store")
+                        }
+                        else 
                         {
                             Type = FileType.Unknown;
                         }
@@ -136,9 +143,21 @@ namespace IVWIN
                 if (info.Type == FileType.File)
                 {
                     list.Add(info);
-                } else if (info.Type == FileType.Directory)
+                }
+                else if (info.Type == FileType.Directory)
                 {
                     dirList.Add(info);
+                }
+                else if (loadOption.loadPixivAnimation && info.Type == FileType.Archive)
+                {
+                    string path = info.FullName;
+                    string jsonPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)) + ".json";
+                    LogWriter.write($" {path}");
+                    if (File.Exists(jsonPath))
+                    {
+                        LogWriter.write($"add");
+                        list.Add(info);
+                    }
                 }
             }
             FileSort.Sort(ref directryListInfo, loadOption.sortOption);
@@ -151,6 +170,7 @@ namespace IVWIN
         //親ディレクトリを取得 =0 current -1 previous +1 next
         public string GetParent(string path, int step)
         {
+//            LogWriter.write("#" + Parent.dirPos + "/" + Parent.dirInfos.Length + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
             String dir = path;
 
             if (Parent != null)
@@ -174,8 +194,6 @@ namespace IVWIN
                 Parent = new VirtualFileList(loadOption);
                 Parent.SearchDirectry(infos[currentPos].Parent);
 
-                LogWritter.write("#" + Parent.dirPos + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
-
                 DirectoryInfo directoryInfo = new DirectoryInfo(dir);
                 if (directoryInfo.FullName == null) return null;
 
@@ -191,7 +209,9 @@ namespace IVWIN
                 }
 
             }
-            LogWritter.write("#" + Parent.dirPos + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
+
+            LogWriter.write("#" + Parent.dirPos + "/" + Parent.dirInfos.Length + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
+
             return Parent.GetDirectory();
         }
 
@@ -215,12 +235,12 @@ namespace IVWIN
                 {
                     return null;
                 }
-                
+                LogWriter.write("path:" +str);
                 return SearchDirectry(str, false, 0);
             }
             if (File.Exists(path))
             {
-                LogWritter.write("Drop File is exist.");
+                LogWriter.write("Drop File is exist.");
 
                 currentFileName = Path.GetFileName(path);
                 currentDir = Path.GetDirectoryName(path);
@@ -229,7 +249,7 @@ namespace IVWIN
             }
             else if (Directory.Exists(path))
             {
-                LogWritter.write("Drop file is directry");
+                LogWriter.write("Drop file is directry");
                 currentDir = path;
                 currentFileName = null;
                 currentFullName = path;
@@ -260,7 +280,7 @@ namespace IVWIN
                 string str = SetCurrentPos(0);
                 if (str == null)
                 {
-                    LogWritter.write("This Directry is empty.");
+                    LogWriter.write("This Directry is empty.");
                     currentFileName = null;
                     return null;
                 }
@@ -276,6 +296,8 @@ namespace IVWIN
             int i = currentPos;
             int old = currentPos;
             isLooped = false;
+
+
             do
             {
                 i++;
@@ -304,7 +326,7 @@ namespace IVWIN
                         currentPos = 0;
                     }
                 }
-            } while (infos[i].Type != FileType.File);
+            } while (infos[i].Type != FileType.File && infos[i].Type != FileType.Archive);
             currentPos = flag ? i : old;
             currentFileName = infos[currentPos].Name;
             string imagePath = Path.Combine(currentDir, infos[i].Name);

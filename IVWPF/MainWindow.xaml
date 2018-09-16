@@ -1,12 +1,13 @@
-﻿<Window x:Name="Main" x:Class="IVWPF.MainWindow"
+﻿<Window x:Name="WindowMain" x:Class="IVWPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IVWPF"
         mc:Ignorable="d"
-        Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" DragEnter="Window_DragEnter" Drop="Window_Drop" DragOver="Window_DragOver" ShowInTaskbar="False" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Background="Black">
+        Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" DragEnter="Window_DragEnter" Drop="Window_Drop" DragOver="Window_DragOver" ShowInTaskbar="False" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Background="Black" Closing="WindowMain_Closing" MouseDown="WindowMain_MouseDown">
     <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove" ManipulationDelta="MainCanvas_ManipulationDelta" TouchDown="MainCanvas_TouchDown" TouchMove="MainCanvas_TouchMove" TouchUp="MainCanvas_TouchUp" PreviewMouseWheel="Image_MouseWheel">
         <Image x:Name="IVWImage" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" ClipToBounds="True" SnapsToDevicePixels="True"  AllowDrop="True" RenderTransformOrigin="0,0" MinWidth="{Binding ActualWidth, ElementName=MainCanvas, Mode=OneWay}" MinHeight="{Binding ActualHeight, ElementName=MainCanvas, Mode=OneWay}" StretchDirection="DownOnly" Stretch="None" IsManipulationEnabled="True" IsEnabled="False"/>
+        <Canvas x:Name="FilerCanvas" Height="{Binding Height, ElementName=MainCanvas}" Canvas.Left="0" Canvas.Top="0" Width="{Binding Width, ElementName=MainCanvas}" Opacity="0"/>
     </Canvas>
 </Window>

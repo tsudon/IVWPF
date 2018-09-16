@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -27,19 +28,13 @@ namespace IVWPF
         public MainWindow()
         {
             InitializeComponent();
-            AddInitialize(null);
+            AddInitialize();
         }
 
-        public MainWindow(string imagePath)
+        private void AddInitialize()
         {
-            InitializeComponent();
-            AddInitialize(imagePath);
-        }
-
-        private void AddInitialize(string imagePath)
-        {
-            loader = new Loader(imagePath);
-            loader.SetImage(IVWImage);
+            string path = Loader.args.Length >= 1 ? Loader.args[0] : null;
+            loader = new Loader(path,IVWImage);
         }
 
         private void Image_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -85,6 +80,10 @@ namespace IVWPF
 
         private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null)
+            {
+                LogWriter.write("Tapped");
+            }
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 if (this.WindowState == WindowState.Maximized)
@@ -115,9 +114,7 @@ namespace IVWPF
         {
             string[] fileName =
                 (string[])e.Data.GetData(DataFormats.FileDrop, false);
-         LogWritter.write(fileName[0]);
-         loader.Load(fileName[0]);
-
+            loader.Load(fileName[0]);
         }
 
          private void Window_DragOver(object sender, DragEventArgs e)
@@ -143,25 +140,27 @@ namespace IVWPF
         private void MainCanvas_TouchDown(object sender, TouchEventArgs e)
         {
             TouchPoint p = e.GetTouchPoint(this);
-            LogWritter.write(" " + p.Position.X + "," + p.Position.Y);
+            LogWriter.write(" " + p.Position.X + "," + p.Position.Y);
         }
 
         private void MainCanvas_TouchMove(object sender, TouchEventArgs e)
         {
             TouchPoint p = e.GetTouchPoint(this);
-            LogWritter.write(" " + p.Position.X + "," + p.Position.Y);
+            LogWriter.write(" " + p.Position.X + "," + p.Position.Y);
 
         }
 
         private void MainCanvas_TouchUp(object sender, TouchEventArgs e)
         {
             TouchPoint p = e.GetTouchPoint(this);
-            LogWritter.write(" " + p.Position.X + "," + p.Position.Y);
+            LogWriter.write(" " + p.Position.X + "," + p.Position.Y);
         }
 
         bool pressAlt = false;
         bool pressShift = false;
         bool pressCtrl = false;
+
+        DebugWindow debug = null;
 
 
         private void Main_KeyDown(object sender, KeyEventArgs e)
@@ -209,6 +208,17 @@ namespace IVWPF
                 case Key.D2:
                     loader.SetMangaMode(true);
                     break;
+                case Key.D:
+                    if (debug == null || !debug.IsVisible)
+                    {
+                        debug = new DebugWindow();
+//                        LogWriter.textBox = debug.Logger;
+                        debug.Show();
+                    }
+                    break;
+                case Key.S:
+                    loader.OptionSave();
+                    break;
                 case Key.Home:
                     loader.JumpPicture(0);
                     break;
@@ -226,7 +236,7 @@ namespace IVWPF
                     if (pressCtrl) str += "CTRL+";
                     if (pressAlt) str += "ALT+";
                     if (pressShift) str += "SHIFT+"; 
-                    LogWritter.write(str + key.ToString() );
+                    LogWriter.write(str + key.ToString() );
                     break;
             }
 
@@ -256,6 +266,91 @@ namespace IVWPF
 
         }
 
+        private void WindowMain_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (debug != null)
+            {
+                debug.Close();
+            }
+        }
+
+
+
+
+        private void MouseDownMethod(MouseButtonEventArgs e)
+        {
+            double mouseX = e.GetPosition(this).X;
+            double mouseY = e.GetPosition(this).Y;
+
+            double w = this.Width;
+            double h = this.Height;
+
+            double left = w * 0.25;
+            double right = w * 0.75;
+            double top = h * 0.25;
+            double down = h * 0.75;
+
+            int p = -1;
+
+            if (mouseX < left)      // left
+            {
+                p = 0;
+            }
+            else if (mouseX > right)   //right
+            {
+                p = 2;
+            }
+            else
+            {
+                p = 1;      //center
+            }
+           if (mouseY < top)      // top
+            {
+                p += 0;
+            }
+            else if (mouseY > down)   //down
+            {
+                p += 6;
+            }
+            else
+            {
+                p += 3;      //center
+            }
+
+            //   0  1  2
+            //   3  4  5
+            //   6  7  8
+
+            switch (p)
+            {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    loader.NextPiture();
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    loader.PreviousPiture();
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+            }
+        }
+
+        private void WindowMain_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            MouseDownMethod(e);
+        }
+
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
             
@@ -267,5 +362,6 @@ namespace IVWPF
                 startY = p.Y;
             }
         }
+
     }
 }
