@@ -27,7 +27,7 @@ namespace IVWIN
 
         static public void write(String str)
         {
-            LogWriter.Text += str + "\n";
+//            LogWriter.Text += str + "\n";
 
             if (TextBox != null)
             {

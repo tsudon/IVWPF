@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace IVWIN
 {
@@ -36,14 +37,17 @@ namespace IVWIN
         public bool isArchveRead = false;
         public bool loadPixivAnimation = true;
         public string CurrentFolder;
-        public string ApplicationName {get; private set;}
-        public string Author { get; private set; }
-        public string Version { get; private set; }
+        public string CurrentFile { get; internal set; }
+        private string ApplicationName;
+        private string Author;
+        private string Version;
+        private string SavePath;
 
 
         public LoadOption(){
-            CurrentFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-            System.Reflection.AssemblyCompanyAttribute acAttribute =
+            CurrentFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+
+            AssemblyCompanyAttribute acAttribute =
    (System.Reflection.AssemblyCompanyAttribute)
         Attribute.GetCustomAttribute(
     System.Reflection.Assembly.GetExecutingAssembly(),
@@ -53,20 +57,110 @@ namespace IVWIN
                     Attribute.GetCustomAttribute(
                 System.Reflection.Assembly.GetExecutingAssembly(),
                 typeof(System.Reflection.AssemblyTitleAttribute));
-
             ApplicationName = atAttibute.Title;
             Author = acAttribute.Company;
             Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            SavePath = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            SavePath = Path.Combine(SavePath, Author, ApplicationName, "loadoption.info");
+            Load();
+        }
+
+        internal string GetApplicationName()
+        {
+            return ApplicationName;
         }
 
         public void Save()
         {
-            Type type = typeof(LoadOption);
-            foreach(FieldInfo info in type.GetFields())
+            LogWriter.write(SavePath);
+
+            try
             {
-                    LogWriter.write(info.Name + " = " + info.GetValue(this));
+                string apppath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                apppath = Path.Combine(apppath, Author);
+                if ( !Directory.Exists(apppath))
+                {
+                    Directory.CreateDirectory(apppath);
+                }
+                apppath = Path.Combine(apppath, ApplicationName);
+                if (!Directory.Exists(apppath))
+                {
+                    Directory.CreateDirectory(apppath);
+                }
+
+                using (StreamWriter stream = File.CreateText(SavePath))
+                {
+                    Type type = typeof(LoadOption);
+                    foreach (FieldInfo info in type.GetFields())
+                    {
+                        stream.WriteLine($"{info.Name}" + " = " + info.GetValue(this));
+                    }
+                }
+            }
+            catch
+            {
+
             }
 
         }
+
+        public void Load()
+        {
+            LogWriter.write(SavePath);
+            try
+            {
+                Type type = typeof(LoadOption);
+                using (StreamReader stream = File.OpenText(SavePath))
+                {
+                    string line = "";
+                    while ((line = stream.ReadLine()) != null)
+                    {
+                        try
+                        {
+                            Regex regex = new Regex("^([a-zA-Z0-9_]+)\\s*\\=\\s*(.*)$");
+                            string[] key = regex.Split(line);
+                            key[1].TrimEnd(' ');
+                            FieldInfo info = type.GetField(key[1]);
+                            Type t = type.GetField(key[1]).FieldType;
+                            LogWriter.write($"#{key[1]}#{key[2]}#{t}");
+
+
+                            if (t == typeof(bool))
+                            {
+                                if (key[2] == "True") info.SetValue(this, true);
+                                else if (key[2] == "False") info.SetValue(this, true);
+                            }
+                            else if (t == typeof(string))
+                            {
+                                info.SetValue(this, key[2]);
+                            }
+                            else if (t == typeof(int))
+                            {
+                                info.SetValue(this, int.Parse(key[2]));
+                            }
+                            else if (t == typeof(double))
+                            {
+                                info.SetValue(this, double.Parse(key[2]));
+                            }
+                            else
+                            {
+                                info.SetValue(this, Enum.Parse(t, key[2]));
+                            }
+                        }
+                        catch(Exception e2)
+                        {
+                            LogWriter.write(e2.ToString());
+                        }
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                LogWriter.write(e.ToString());
+            }
+
+        }
+
+
     }
 }

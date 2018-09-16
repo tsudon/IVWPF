@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Controls;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Collections.ObjectModel;
 using IVWIN;
 using System.Windows.Media.Animation;
-using System.Threading.Tasks;
+
 
 namespace IVWPF
 
@@ -42,6 +39,9 @@ namespace IVWPF
 
             if (imagePath != null)
             {
+                Load(imagePath);
+            } else if (loadOption.CurrentFile != null) {
+                imagePath = loadOption.CurrentFile;
                 Load(imagePath);
             }
         }
@@ -185,6 +185,11 @@ namespace IVWPF
             }
         }
 
+        internal void OptionLoad()
+        {
+            loadOption.Load();
+        }
+
         private LocalDecoder GetDecoderFromZip(string imagePath)
         {
             try
@@ -200,6 +205,7 @@ namespace IVWPF
 
         internal void OptionSave()
         {
+            loadOption.CurrentFile = currentPath;
             loadOption.Save();
         }
 

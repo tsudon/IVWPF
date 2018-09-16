@@ -49,7 +49,7 @@ namespace IVWPF
                         if (loadOption ==null)loadOption = new LoadOption();
             loader = new Loader(path, IVWImage,loadOption);
             filer = new Filer(this,loadOption);
-            this.Title = loadOption.ApplicationName;
+            this.Title = loadOption.GetApplicationName();
             FolderLabel.Content = loadOption.CurrentFolder;
         }
 
@@ -212,6 +212,10 @@ namespace IVWPF
                 case Key.S:
                     loader.OptionSave();
                     break;
+                case Key.L:
+                    loader.OptionLoad();
+                    break;
+
                 case Key.Home:
                     loader.JumpPicture(0);
                     break;
@@ -261,6 +265,7 @@ namespace IVWPF
 
         private void WindowMain_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            loader.OptionSave();
             if (debug != null)
             {
                 debug.Close();
@@ -398,9 +403,7 @@ namespace IVWPF
         private void FilerListBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             int i = FilerListBox.SelectedIndex;
-            LogWriter.write($"Selected {i}");
-            LogWriter.write($"Select {i}");
-            LogWriter.write(filer.GetSelectedPath(i));
+            if (i < 0) return;
             string path = filer.GetSelectedPath(i);
             if(Directory.Exists(path))
             {
