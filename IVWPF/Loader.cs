@@ -35,10 +35,10 @@ namespace IVWPF
         static internal string[] args;
 
 
-        public Loader(string imagePath, Image image)
+        public Loader(string imagePath, Image image,LoadOption load)
         {
             this.Image = image;
-            loadOption = new LoadOption();
+            this.loadOption = load;
 
             if (imagePath != null)
             {

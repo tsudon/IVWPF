@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 
 namespace IVWIN
@@ -34,6 +35,29 @@ namespace IVWIN
         public bool isDirectoryMove = true;
         public bool isArchveRead = false;
         public bool loadPixivAnimation = true;
+        public string CurrentFolder;
+        public string ApplicationName {get; private set;}
+        public string Author { get; private set; }
+        public string Version { get; private set; }
+
+
+        public LoadOption(){
+            CurrentFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            System.Reflection.AssemblyCompanyAttribute acAttribute =
+   (System.Reflection.AssemblyCompanyAttribute)
+        Attribute.GetCustomAttribute(
+    System.Reflection.Assembly.GetExecutingAssembly(),
+    typeof(System.Reflection.AssemblyCompanyAttribute));
+            System.Reflection.AssemblyTitleAttribute atAttibute =
+                (System.Reflection.AssemblyTitleAttribute)
+                    Attribute.GetCustomAttribute(
+                System.Reflection.Assembly.GetExecutingAssembly(),
+                typeof(System.Reflection.AssemblyTitleAttribute));
+
+            ApplicationName = atAttibute.Title;
+            Author = acAttribute.Company;
+            Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        }
 
         public void Save()
         {
