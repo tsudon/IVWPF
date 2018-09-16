@@ -131,14 +131,13 @@ namespace IVWIN
         }
 
         //ディレクトリ情報をリスト化
-        public void ListDirectory(String directroy)
+        private void ListDirectory(String directroy)
         {
             directryListInfo.Clear();
             dirList.Clear();
             List<VirtualFileInfo> list = new List<VirtualFileInfo>();
             foreach (string f in Directory.GetFileSystemEntries(directroy))
             {
-
                 VirtualFileInfo info = new VirtualFileInfo(f, 0);
                 directryListInfo.Add(info);
                 if (info.Type == FileType.File)
@@ -210,6 +209,9 @@ namespace IVWIN
                 }
 
             }
+
+            LogWriter.write("#" + Parent.dirPos + "/" + Parent.dirInfos.Length + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
+
             return Parent.GetDirectory();
         }
 

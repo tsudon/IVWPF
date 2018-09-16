@@ -43,9 +43,7 @@ namespace IVWIN
                     return null;
                 }
             }
-#pragma warning disable CS0168 // 変数 'e' は宣言されていますが、使用されていません。
             catch (Exception e)
-#pragma warning restore CS0168 // 変数 'e' は宣言されていますが、使用されていません。
             {
                 try
                 {

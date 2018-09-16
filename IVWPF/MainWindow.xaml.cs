@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -24,17 +23,7 @@ namespace IVWPF
         Loader loader;
         private double startX, startY;
         private bool isMove = false;
-        LoadOption loadOption;
-#pragma warning disable CS0169 // フィールド 'MainWindow.filer' は使用されていません。
-        Filer filer;
-#pragma warning restore CS0169 // フィールド 'MainWindow.filer' は使用されていません。
 
-        enum TabList
-        {
-            ImageTab =0,
-            FilerTab=1,
-            SettingTab =2
-        }
 
         public MainWindow()
         {
@@ -44,13 +33,8 @@ namespace IVWPF
 
         private void AddInitialize()
         {
-            
             string path = Loader.args.Length >= 1 ? Loader.args[0] : null;
-                        if (loadOption ==null)loadOption = new LoadOption();
-            loader = new Loader(path, IVWImage,loadOption);
-            filer = new Filer(this,loadOption);
-            this.Title = loadOption.ApplicationName;
-            FolderLabel.Content = loadOption.CurrentFolder;
+            loader = new Loader(path,IVWImage);
         }
 
         private void Image_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -113,8 +97,31 @@ namespace IVWPF
                     this.WindowState = WindowState.Maximized;
                 }
             }
-    }
+        }
 
+        private void Window_DragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+
+
+        private void Window_DragLeave(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            string[] fileName =
+                (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            loader.Load(fileName[0]);
+        }
+
+         private void Window_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.All;
+            this.AllowDrop = true;
+        }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
         {
@@ -270,7 +277,7 @@ namespace IVWPF
 
 
 
-        private void ImageMouseDownMethod(MouseButtonEventArgs e)
+        private void MouseDownMethod(MouseButtonEventArgs e)
         {
             double mouseX = e.GetPosition(this).X;
             double mouseY = e.GetPosition(this).Y;
@@ -319,7 +326,6 @@ namespace IVWPF
                 case 0:
                     break;
                 case 1:
-                    FilerMode();
                     break;
                 case 2:
                     break;
@@ -340,81 +346,10 @@ namespace IVWPF
             }
         }
 
-        private void FilerMode()
-        {
-            MainTab.SelectedIndex = (int)TabList.FilerTab;
-            filer.Open();
-        }
-
-        private void ImageMode(string path)
-        {
-            MainTab.SelectedIndex = (int)TabList.ImageTab;
-            loader.Load(path);
-        }
-
-        private void ImageMode()
-        {
-            MainTab.SelectedIndex = (int)TabList.ImageTab;
-        }
-
         private void WindowMain_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            switch (MainTab.SelectedIndex) {
-                case 0:
-                    ImageMouseDownMethod(e);
-                    break;
-                case 1:
-                    //MainTab.SelectedIndex = 0;
-                    break;
-            }
+            MouseDownMethod(e);
         }
-
-
-
-
-        private void Image_Drop(object sender, DragEventArgs e)
-        {
-            string[] fileName = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            loader.Load(fileName[0]);
-        }
-
-        private void ImageGrid_DragOver(object sender, DragEventArgs e)
-        {
-            e.Effects = DragDropEffects.All;
-            this.AllowDrop = true;
-            ImageGrid.AllowDrop = true;
-        }
-
-        private void ImageGrid_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-        }
-
-        private void BuckImageButton_Click(object sender, RoutedEventArgs e)
-        {
-            MainTab.SelectedIndex = 0;
-        }
-
-        
-        private void FilerListBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            int i = FilerListBox.SelectedIndex;
-            LogWriter.write($"Selected {i}");
-            LogWriter.write($"Select {i}");
-            LogWriter.write(filer.GetSelectedPath(i));
-            string path = filer.GetSelectedPath(i);
-            if(Directory.Exists(path))
-            {
-                filer.Open(path);
-            }
-            else if(File.Exists(path))
-            {
-                ImageMode(path);
-            }
-        }
-
-
-
-
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
