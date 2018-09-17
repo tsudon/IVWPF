@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:IVWPF"
         xmlns:Properties="clr-namespace:IVWPF.Properties" x:Name="WindowMain" x:Class="IVWPF.MainWindow"
         mc:Ignorable="d"
-        Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Closing="WindowMain_Closing" MouseDown="WindowMain_MouseDown" Background="{x:Null}" Icon="Resources/IV.png">
+        Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Closing="WindowMain_Closing" MouseDown="WindowMain_MouseDown" Background="{x:Null}" Icon="Resources/IV.png" IsManipulationEnabled="True">
     <Window.Resources>
         <BitmapImage x:Key="BmpICON" UriSource="Resources/bmp.png" />
         <BitmapImage x:Key="FolderICON" UriSource="Resources/folder.png" />
@@ -19,12 +19,11 @@
         <BitmapImage x:Key="TiffICON" UriSource="Resources/tiff.png" />
         <BitmapImage x:Key="DriveICON" UriSource="Resources/drive.png" />
     </Window.Resources>
-    <TabControl x:Name="MainTab" Margin="0" Background="Black" BorderBrush="Black" SelectedIndex="0" BorderThickness="0">
-        <TabItem Header="TabItem" Margin="0" Width="0" Height="0" BorderBrush="Black" IsEnabled="False">
-            <Grid x:Name="ImageGrid" Drop="Image_Drop" DragOver="ImageGrid_DragOver" Background="Black" Width="{Binding Width, ElementName=MainTab}" Height="{Binding Height, ElementName=MainTab}" MouseDown="ImageGrid_MouseDown">
-                <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove" ManipulationDelta="MainCanvas_ManipulationDelta" TouchDown="MainCanvas_TouchDown" TouchMove="MainCanvas_TouchMove" TouchUp="MainCanvas_TouchUp" PreviewMouseWheel="Image_MouseWheel">
+    <TabControl x:Name="MainTab" Margin="0" Background="Black" BorderBrush="Black" SelectedIndex="0" BorderThickness="0" IsManipulationEnabled="True">
+        <TabItem Header="TabItem" Margin="0" Width="0" Height="0" BorderBrush="Black" IsEnabled="False" IsManipulationEnabled="True">
+            <Grid x:Name="ImageGrid" Drop="Image_Drop" DragOver="ImageGrid_DragOver" Background="Black" Width="{Binding Width, ElementName=MainTab}" Height="{Binding Height, ElementName=MainTab}" MouseDown="ImageGrid_MouseDown" IsManipulationEnabled="True">
+                <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove" ManipulationDelta="MainCanvas_ManipulationDelta" TouchDown="MainCanvas_TouchDown" TouchMove="MainCanvas_TouchMove" TouchUp="MainCanvas_TouchUp" PreviewMouseWheel="Image_MouseWheel" IsManipulationEnabled="True">
                     <Image x:Name="IVWImage" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" ClipToBounds="True" SnapsToDevicePixels="True"  AllowDrop="True" RenderTransformOrigin="0,0" MinWidth="{Binding ActualWidth, ElementName=MainCanvas, Mode=OneWay}" MinHeight="{Binding ActualHeight, ElementName=MainCanvas, Mode=OneWay}" StretchDirection="DownOnly" Stretch="None" IsManipulationEnabled="True" IsEnabled="False"/>
-                    <Canvas x:Name="FilerCanvas" Height="{Binding Height, ElementName=MainCanvas}" Canvas.Left="0" Canvas.Top="0" Width="{Binding Width, ElementName=MainCanvas}" Opacity="0"/>
                 </Canvas>
             </Grid>
         </TabItem>
