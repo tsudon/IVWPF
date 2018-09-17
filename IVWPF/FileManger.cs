@@ -110,6 +110,8 @@ namespace IVWIN
     }
 
 
+    /* 書き直した方が早いぐらいな酷いコード　*/
+
     class VirtualFileList
     {
         public string currentFileName;
@@ -171,7 +173,7 @@ namespace IVWIN
         //親ディレクトリを取得 =0 current -1 previous +1 next
         public string GetParent(string path, int step)
         {
-//            LogWriter.write("#" + Parent.dirPos + "/" + Parent.dirInfos.Length + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
+//           LogWriter.write("#" + Parent.dirPos + "/" + Parent.dirInfos.Length + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
             String dir = path;
 
             if (Parent != null)
@@ -194,28 +196,53 @@ namespace IVWIN
 
                 Parent = new VirtualFileList(loadOption);
                 Parent.SearchDirectry(infos[currentPos].Parent);
+                Parent.SearchCurrentDirectryPos(infos[currentPos].Parent);
 
                 DirectoryInfo directoryInfo = new DirectoryInfo(dir);
                 if (directoryInfo.FullName == null) return null;
-
-                if (step >= 0)
+                Parent.dirPos += step;
+                if (Parent.dirPos < 0)
                 {
-                    if (step >= Parent.infos.Length) step = Parent.infos.Length - 1;
-                    Parent.dirPos = step;
-                }
-                else
-                {
-                    if (step >= Parent.infos.Length) step = 0;
-                    Parent.dirPos = Parent.infos.Length - step;
+                    Parent.dirPos = Parent.dirInfos.Length - 1;
                 }
 
+                if (Parent.dirPos > Parent.dirInfos.Length - 1)
+                {
+                    Parent.dirPos = 0;
+                }
             }
             return Parent.GetDirectory();
         }
 
+        //ディレクトリ名からインデックスを取得
+        //ハッシュ管理してない。ファイルが1000も無いかぎりパフォーマンスに差は無い（たぶん）
+        public int SearchCurrentDirectryPos(string dirpath)
+        {
+            if (Directory.Exists(dirpath))
+            {
+                for (int i = 0; i < dirInfos.Length; i++)
+                {
+                    if (dirInfos[i].FullName == dirpath)
+                    {
+                        dirPos = i;
+                        break;
+                    }
+                }
+                dirPos = 0;
+            }
+            else
+            {
+                dirPos = 0;
+                return -1;
+            }
+
+            return dirPos;
+        }
 
         public string GetDirectory()
         {
+            LogWriter.write($"GetDirectroy {dirPos} Position");
+
             return dirInfos[dirPos].DirectoryFullName;
         }
 
@@ -372,6 +399,7 @@ namespace IVWIN
 
         public string GetImagePath(string path)
         {
+            if (path == null) return null; 
             SearchDirectry(path);
             string imagePath = Path.Combine(currentDir,currentFileName);
             return imagePath;
@@ -499,7 +527,7 @@ namespace IVWIN
         internal string GetPreviousFolderFile()
         {
             list.SearchDirectry(-1);
-            imagePath = list.GetPreviousPath(true);
+            imagePath = list.SetCurrentPos(-1);
             return imagePath;
         }
 

@@ -29,10 +29,6 @@ namespace IVWPF
         private FileManager manager;
 
         private string currentPath;
-        private string currentDir;
-
-        static internal string[] args;
-
 
         public Loader(string imagePath, Image image,LoadOption load)
         {
@@ -48,16 +44,48 @@ namespace IVWPF
             }
         }
 
-        public void Load(string imagePath)
+        public Loader(Image image, LoadOption load)
         {
-            manager = new FileManager(imagePath, loadOption);
-            PaintPicture(manager.GetImagePath(imagePath));
-            loadOption.CurrentFile = currentPath;
-            loadOption.CurrentFile = manager.GetFolder();
+            this.Image = image;
+            this.loadOption = load;
+
+            if (load.CurrentFile != null)
+            {
+                try
+                {
+                    if (File.Exists(loadOption.CurrentFile))
+                    {
+                        Load(loadOption.CurrentFile);
+                    } else
+                    {
+                        loadOption.CurrentFile = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogWriter.write(e.ToString());
+                    loadOption.CurrentFile = null;
+                }
+
+            }
         }
 
+        public void Load(string imagePath)
+        {
+            LogWriter.write($"Load {imagePath}");
+            try
+            {
 
 
+                manager = new FileManager(imagePath, loadOption);
+                PaintPicture(manager.GetImagePath(imagePath));
+                loadOption.CurrentFile = currentPath;
+                loadOption.CurrentFolder = manager.GetFolder();
+            } catch (Exception e)
+            {
+                LogWriter.write(e.ToString());
+            }
+        }
 
         private BitmapDecoder GetDecoderFromPath(string path)
         {
@@ -78,6 +106,7 @@ namespace IVWPF
 
         public void PaintPicture(string imagePath)
         {
+
             try
             {
                 LocalDecoder decoder;
@@ -99,12 +128,15 @@ namespace IVWPF
                 isAnimation = false;
                 bmp = bitmapFrames[0];
 
+                //                LogWriter.write($"PaintPicture4 {decoder.Metadata.Format}");
+
 
                 Clear();
 
                 if (frameCount > 1 && loadOption.isAnimate)
                 {
-                    if (decoder.Metadata != null && decoder.Metadata.Format == "gif") isAnimation = true;
+                    if (decoder.Metadata != null)
+                        if(decoder.Metadata.Format != null && decoder.Metadata.Format == "gif") isAnimation = true;
                     if (decoder.IsAnimation) isAnimation = true;
                 }
 
@@ -181,6 +213,8 @@ namespace IVWPF
                     }
                 }
                 currentPath = imagePath;
+
+
             }
             catch (Exception e)
             {
@@ -224,11 +258,8 @@ namespace IVWPF
         public void Clear()
         {
             Image.Source = null;
-            if (isAnimation)
-            {
-                Image.BeginAnimation(Image.SourceProperty, null);
-                isAnimation = false;
-            }
+            Image.BeginAnimation(Image.SourceProperty, null);
+            isAnimation = false;
         }
 
 
@@ -637,7 +668,6 @@ namespace IVWPF
             int imgHeight = bmp.PixelHeight;
 
 
-
             GetScaleValue v = GetScale(imgWidth, imgHeight, width, height, bmp.DpiX, bmp.DpiY);
             scaleX = v.scaleX;
             scaleY = v.scaleY;
@@ -677,9 +707,17 @@ namespace IVWPF
 
         public void ResizePicture(double deltaX, double deltaY)
         {
+            int width = (int)Image.MinWidth;
+            int height = (int)Image.MinHeight;
 
             scaleX *= deltaX;
             scaleY *= deltaY;
+
+
+
+            offsetX -= deltaX * width;
+            offsetY -= deltaX * height;
+
 
             TransformGroup transforms = new TransformGroup();
             transforms.Children.Add(new ScaleTransform(scaleX, scaleY));
@@ -755,8 +793,9 @@ namespace IVWPF
 
                 if (isManga)
                 {
-                    isManga = false;
                     manager.GetPreviousPath();
+                    manager.GetPreviousPath();
+                    isManga = false;
                 }
                 string imagePath = manager.GetPreviousPath();
                

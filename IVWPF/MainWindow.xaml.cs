@@ -44,12 +44,10 @@ namespace IVWPF
 
         private void AddInitialize()
         {
-
-
-
-            string path = Loader.args.Length >= 1 ? Loader.args[0] : null;
-                        if (loadOption ==null)loadOption = new LoadOption();
-            loader = new Loader(path, IVWImage,loadOption);
+//            string path = Loader.args.Length >= 1 ? Loader.args[0] : null;
+            if (loadOption ==null)loadOption = new LoadOption();
+            //            loader = new Loader(path, IVWImage,loadOption);
+            loader = new Loader(IVWImage,loadOption);
             filer = new Filer(this,loadOption);
             this.Title = loadOption.GetApplicationName();
             FolderLabel.Content = loadOption.CurrentFolder;
@@ -96,6 +94,7 @@ namespace IVWPF
             isMove = false;
         }
 
+
         //誤動作を引き起こすのでとりあえずオフ
         private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -133,9 +132,8 @@ namespace IVWPF
         private void MainCanvas_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
             ManipulationDelta delta = e.DeltaManipulation;
-
-            loader.ResizePicture(delta.Scale.X,delta.Scale.Y);
-                        
+//            loader.ResizePicture(delta.Scale.X,delta.Scale.Y);
+            loader.MovePicture(delta.Translation.X, delta.Translation.Y);                        
 
         }
 
@@ -232,10 +230,10 @@ namespace IVWPF
                     loader.JumpPicture(-1);
                     break;
                 case Key.Up:
-//                    loader.PreviousFolderPicture(); // bug
+                    loader.PreviousFolderPicture(); // bug
                     break;
                 case Key.Down:
-//                    loader.NextFolderPicture();
+                    loader.NextFolderPicture();
                     break;
                 default:
                     String str = "";
@@ -284,18 +282,18 @@ namespace IVWPF
 
 
 
-        private void ImageMouseDownMethod(MouseButtonEventArgs e)
+        private void ImageMouseDownMethod(Point point)
         {
-            double mouseX = e.GetPosition(this).X;
-            double mouseY = e.GetPosition(this).Y;
+            double mouseX = point.X;
+            double mouseY = point.Y;
 
-            double w = this.Width;
-            double h = this.Height;
+            double w = ImageGrid.ActualWidth;
+            double h = ImageGrid.ActualHeight;
 
-            double left = w * 0.25;
-            double right = w * 0.75;
-            double top = h * 0.25;
-            double down = h * 0.75;
+            double left = w * 0.2;
+            double right = w * 0.8;
+            double top = h * 0.2;
+            double down = h * 0.8;
 
             int p = -1;
 
@@ -373,17 +371,6 @@ namespace IVWPF
             MainTab.SelectedIndex = (int)TabList.ImageTab;
         }
 
-        private void WindowMain_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            switch (MainTab.SelectedIndex) {
-                case 0:
-                    ImageMouseDownMethod(e);
-                    break;
-                case 1:
-                    //MainTab.SelectedIndex = 0;
-                    break;
-            }
-        }
 
 
 
@@ -401,9 +388,7 @@ namespace IVWPF
             ImageGrid.AllowDrop = true;
         }
 
-        private void ImageGrid_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-        }
+
 
         private void BuckImageButton_Click(object sender, RoutedEventArgs e)
         {
@@ -424,9 +409,40 @@ namespace IVWPF
             }
         }
 
+        private void WindowMain_TouchDown(object sender, TouchEventArgs e)
+        {
 
+        }
 
+        private void WindowMain_MouseDown(object sender, MouseButtonEventArgs e)
+        {
 
+        }
+
+        private void ImageGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            switch (MainTab.SelectedIndex)
+            {
+                case 0:
+                    ImageMouseDownMethod(e.GetPosition(this));
+                    break;
+                case 1:
+                    //MainTab.SelectedIndex = 0;
+                    break;
+            }
+        }
+        private void ImageGrid_TouchDown(object sender, TouchEventArgs e)
+        {
+            switch (MainTab.SelectedIndex)
+            {
+                case 0:
+                    ImageMouseDownMethod(e.GetTouchPoint(this).Position);
+                    break;
+                case 1:
+                    //MainTab.SelectedIndex = 0;
+                    break;
+            }
+        }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
