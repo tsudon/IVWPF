@@ -503,5 +503,9 @@ namespace IVWIN
             return imagePath;
         }
 
+        internal string GetFolder()
+        {
+            return list.currentDir;
+        }
     }
 }

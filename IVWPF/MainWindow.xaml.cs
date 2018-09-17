@@ -44,7 +44,9 @@ namespace IVWPF
 
         private void AddInitialize()
         {
-            
+
+
+
             string path = Loader.args.Length >= 1 ? Loader.args[0] : null;
                         if (loadOption ==null)loadOption = new LoadOption();
             loader = new Loader(path, IVWImage,loadOption);
@@ -348,12 +350,14 @@ namespace IVWPF
         private void FilerMode()
         {
             MainTab.SelectedIndex = (int)TabList.FilerTab;
+            LogWriter.write("Switch Filer");
             filer.Open();
         }
 
         private void ImageMode(string path)
         {
             MainTab.SelectedIndex = (int)TabList.ImageTab;
+            LogWriter.write("Switch Viewer");
             loader.Load(path);
         }
 
@@ -405,13 +409,11 @@ namespace IVWPF
             int i = FilerListBox.SelectedIndex;
             if (i < 0) return;
             string path = filer.GetSelectedPath(i);
-            if(Directory.Exists(path))
-            {
-                filer.Open(path);
-            }
-            else if(File.Exists(path))
+            if(File.Exists(path))
             {
                 ImageMode(path);
+            } else { 
+                filer.Open(path);
             }
         }
 

@@ -55,8 +55,8 @@ namespace IVWPF
             Grid labelGrid = new Grid();
             labelGrid.Margin = new Thickness(0);
 
-           labelGrid.SetBinding(Grid.WidthProperty, bindingLabel);
-           labelGrid.SetBinding(Grid.MinWidthProperty, bindingLabel);
+            labelGrid.SetBinding(Grid.WidthProperty, bindingLabel);
+            labelGrid.SetBinding(Grid.MinWidthProperty, bindingLabel);
 
             RowDefinition row1 = new RowDefinition();
             row1.Height = new GridLength(34.0 ,GridUnitType.Pixel);
@@ -125,17 +125,27 @@ namespace IVWPF
                 
                 BitmapImage upIcon = window.Resources["UpICON"] as BitmapImage;
                 BitmapImage folderIcon = window.Resources["FolderICON"] as BitmapImage;
-                BitmapImage gifIcon = window.Resources["GifCON"] as BitmapImage;
+                BitmapImage gifIcon = window.Resources["GifICON"] as BitmapImage;
                 BitmapImage jpegIcon = window.Resources["JpegICON"] as BitmapImage;
                 BitmapImage pngIcon = window.Resources["PngICON"] as BitmapImage;
                 BitmapImage zipIcon = window.Resources["ZipICON"] as BitmapImage;
                 BitmapImage iconIcon = window.Resources["IconICON"] as BitmapImage;
                 BitmapImage tiffIcon = window.Resources["TiffICON"] as BitmapImage;
                 BitmapImage bmpIcon = window.Resources["BmpICON"] as BitmapImage;
+                BitmapImage driveIcon = window.Resources["DriveICON"] as BitmapImage;
 
                 System.Collections.IDictionary directory = window.Resources;
 
+                if (path == "drive:")
+                {
+                    window.FolderLabel.Content = "drive:";
+                    DriveList();
+                    return;
+                }
+
                 string foldername = path !=null ? path : loadOption.CurrentFolder;
+
+                
                 if (!Directory.Exists(path))
                 {
                     foldername = System.Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
@@ -151,12 +161,16 @@ namespace IVWPF
                 items.Clear();
                 listBoxList.Clear();
 
+
+
                 DateTime date  = Directory.GetCreationTime(foldername);
                 DirectoryInfo d = Directory.GetParent(foldername);
                 Grid grid;
                 if (d == null)
                 {
-                    DriveList();
+                    grid = ListGrid(driveIcon, "drive:", date, -1);
+                    items.Add(grid);
+                    listBoxList.Add("drive:");
                 }
                 else
                 {
@@ -202,6 +216,10 @@ namespace IVWPF
                         case ".tif":
                             bmp = tiffIcon;
                             break;
+                        case ".zip":
+                            bmp = zipIcon;
+                            break;
+
                     }
 
                     grid = ListGrid(bmp, info.Name, info.CreationTime, info.Length);
@@ -223,6 +241,9 @@ namespace IVWPF
             Grid grid;
             string[] drives = Directory.GetLogicalDrives();
 
+            items.Clear();
+            listBoxList.Clear();
+
             foreach (string drive in drives)
             {
                 grid = ListGrid(driveIcon, drive, new DateTime(), -1);
@@ -240,6 +261,7 @@ namespace IVWPF
         object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             double v= (double) value - 80;
+            v = v >= 0 ? v : 0;
             return v;
         }
 

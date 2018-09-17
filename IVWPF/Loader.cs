@@ -29,6 +29,8 @@ namespace IVWPF
         private FileManager manager;
 
         private string currentPath;
+        private string currentDir;
+
         static internal string[] args;
 
 
@@ -50,7 +52,8 @@ namespace IVWPF
         {
             manager = new FileManager(imagePath, loadOption);
             PaintPicture(manager.GetImagePath(imagePath));
-
+            loadOption.CurrentFile = currentPath;
+            loadOption.CurrentFile = manager.GetFolder();
         }
 
 
@@ -205,8 +208,7 @@ namespace IVWPF
 
         internal void OptionSave()
         {
-            loadOption.CurrentFile = currentPath;
-            loadOption.Save();
+              loadOption.Save();
         }
 
         public void SetMangaMode(bool flag)
@@ -724,6 +726,8 @@ namespace IVWPF
                 string imagePath = manager.GetNextPath();
                 if (imagePath == null) return;
                 PaintPicture(imagePath);
+                loadOption.CurrentFile = imagePath;
+                loadOption.CurrentFolder = manager.GetFolder();
 
                 if (!isAnimation)
                 {
@@ -758,6 +762,9 @@ namespace IVWPF
                
                 if (imagePath == null) return;
                 PaintPicture(imagePath);
+                loadOption.CurrentFile = imagePath;
+                loadOption.CurrentFolder = manager.GetFolder();
+
                 if (!isAnimation)
                 {
                     Image.BeginAnimation(Image.SourceProperty, null);
@@ -791,6 +798,9 @@ namespace IVWPF
                 }
                 String path = manager.GetPathFormPos(pos);
                 PaintPicture(path);
+                loadOption.CurrentFile = path;
+                loadOption.CurrentFolder = manager.GetFolder();
+
             }
             catch (Exception e)
             {
@@ -814,6 +824,9 @@ namespace IVWPF
                 }
                 String path = manager.GetNextFolderFile();
                 PaintPicture(path);
+                loadOption.CurrentFile = path;
+                loadOption.CurrentFolder = manager.GetFolder();
+
             }
             catch (Exception e)
             {
@@ -838,6 +851,9 @@ namespace IVWPF
                 }
                 String path = manager.GetPreviousFolderFile();
                 PaintPicture(path);
+                loadOption.CurrentFile = path;
+                loadOption.CurrentFolder = manager.GetFolder();
+
             }
             catch (Exception e)
             {

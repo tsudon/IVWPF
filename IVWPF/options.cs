@@ -37,7 +37,7 @@ namespace IVWIN
         public bool isArchveRead = false;
         public bool loadPixivAnimation = true;
         public string CurrentFolder;
-        public string CurrentFile { get; internal set; }
+        public string CurrentFile;
         private string ApplicationName;
         private string Author;
         private string Version;
