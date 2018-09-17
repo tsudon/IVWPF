@@ -136,7 +136,7 @@ namespace IVWPF
                 if (frameCount > 1 && loadOption.isAnimate)
                 {
                     if (decoder.Metadata != null)
-                        if(decoder.Metadata.Format != null && decoder.Metadata.Format == "gif") isAnimation = true;
+                        if (decoder.Metadata.Format != null && decoder.Metadata.Format == "gif") isAnimation = true;
                     if (decoder.IsAnimation) isAnimation = true;
                 }
 

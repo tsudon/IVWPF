@@ -104,6 +104,7 @@
     <Compile Include="Filer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LocalDecoder.cs" />
+    <Compile Include="MainWindow.cs" />
     <Compile Include="ZipBitmapDecoder.cs" />
     <Compile Include="DebugWindow.xaml.cs">
       <DependentUpon>DebugWindow.xaml</DependentUpon>

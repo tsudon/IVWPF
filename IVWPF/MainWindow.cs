@@ -1,0 +1,165 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using IVWIN;
+
+namespace IVWPF
+{
+    /// <summary>
+    /// MainWindow ロジック
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        private void SwitchWindow()
+
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowStyle = WindowStyle.SingleBorderWindow;
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowStyle = WindowStyle.None;
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void MoveFilerListBox(int step)
+        {
+            int i = FilerListBox.SelectedIndex + step;
+            if (i > FilerListBox.Items.Count - 1) i = FilerListBox.Items.Count - 1;
+            if (i < 0) i = 0;
+            FilerListBox.SelectedIndex = i;
+            FilerListBox.ScrollIntoView(FilerListBox.SelectedItem);
+
+        }
+
+
+        private void SetFilerListBox(int pos)
+        {
+            int i = pos;
+            if (i > FilerListBox.Items.Count - 1) i = FilerListBox.Items.Count - 1;
+            if (i < 0) i = 0;
+            FilerListBox.SelectedIndex = i;
+            FilerListBox.ScrollIntoView(FilerListBox.SelectedItem);
+
+        }
+
+        private void ImageMouseDownMethod(Point point)
+        {
+            double mouseX = point.X;
+            double mouseY = point.Y;
+
+            double w = ImageGrid.ActualWidth;
+            double h = ImageGrid.ActualHeight;
+
+            double left = w * 0.2;
+            double right = w * 0.8;
+            double top = h * 0.2;
+            double down = h * 0.8;
+
+            int p = -1;
+
+            if (mouseX < left)      // left
+            {
+                p = 0;
+            }
+            else if (mouseX > right)   //right
+            {
+                p = 2;
+            }
+            else
+            {
+                p = 1;      //center
+            }
+            if (mouseY < top)      // top
+            {
+                p += 0;
+            }
+            else if (mouseY > down)   //down
+            {
+                p += 6;
+            }
+            else
+            {
+                p += 3;      //center
+            }
+
+            //   0  1  2
+            //   3  4  5
+            //   6  7  8
+
+            switch (p)
+            {
+                case 0:
+                    break;
+                case 1:
+                    FilerMode();
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    loader.NextPiture();
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    loader.PreviousPiture();
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+            }
+        }
+
+        private void FilerMode()
+        {
+            MainTab.SelectedIndex = (int)TabList.FilerTab;
+            LogWriter.write("Switch Filer");
+            filer.Open();
+        }
+
+        private void ImageMode(string path)
+        {
+            MainTab.SelectedIndex = (int)TabList.ImageTab;
+            LogWriter.write("Switch Viewer");
+            loader.Load(path);
+        }
+
+        private void ImageMode()
+        {
+            MainTab.SelectedIndex = (int)TabList.ImageTab;
+        }
+
+        private void SelectFilerListBox()
+        {
+            int i = FilerListBox.SelectedIndex;
+            if (i < 0) return;
+            string path = filer.GetSelectedPath(i);
+            if (File.Exists(path))
+            {
+                ImageMode(path);
+            }
+            else
+            {
+                filer.Open(path);
+            }
+        }
+
+    }
+}

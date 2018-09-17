@@ -122,7 +122,6 @@ namespace IVWPF
         {
             try
             {
-                
                 BitmapImage upIcon = window.Resources["UpICON"] as BitmapImage;
                 BitmapImage folderIcon = window.Resources["FolderICON"] as BitmapImage;
                 BitmapImage gifIcon = window.Resources["GifICON"] as BitmapImage;
@@ -227,6 +226,7 @@ namespace IVWPF
                     listBoxList.Add(info.FullName);
                     loadOption.CurrentFolder = foldername;
                 }
+                window.FilerListBox.SelectedIndex = 0;
             }
             catch (Exception e)
             {
