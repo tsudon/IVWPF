@@ -96,27 +96,34 @@ namespace IVWPF
             isMove = false;
         }
 
+        //誤動作を引き起こすのでとりあえずオフ
         private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+
             if (e.StylusDevice != null)
             {
                 LogWriter.write("Tapped");
             }
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if (this.WindowState == WindowState.Maximized)
-                {
-                    this.WindowStyle = WindowStyle.SingleBorderWindow;
-                    this.WindowState = WindowState.Normal;
-                }
-                else
-                {
-                    this.WindowStyle = WindowStyle.None;
-                    this.WindowState = WindowState.Maximized;
-                }
+//                WindowModeSwitch();
             }
-    }
 
+        }
+
+        private void WindowModeSwitch()
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowStyle = WindowStyle.SingleBorderWindow;
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowStyle = WindowStyle.None;
+                this.WindowState = WindowState.Maximized;
+            }
+        }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
         {

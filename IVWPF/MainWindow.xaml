@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:IVWPF"
         xmlns:Properties="clr-namespace:IVWPF.Properties" x:Name="WindowMain" x:Class="IVWPF.MainWindow"
         mc:Ignorable="d"
-        Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Closing="WindowMain_Closing" MouseDown="WindowMain_MouseDown" Background="{x:Null}">
+        Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Closing="WindowMain_Closing" MouseDown="WindowMain_MouseDown" Background="{x:Null}" Icon="Resources/IV.png">
     <Window.Resources>
         <BitmapImage x:Key="BmpICON" UriSource="Resources/bmp.png" />
         <BitmapImage x:Key="FolderICON" UriSource="Resources/folder.png" />
