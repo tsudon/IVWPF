@@ -115,10 +115,21 @@ namespace IVWPF
 
         internal void Open()
         {
-            Open(loadOption.CurrentFolder);
+            Open(loadOption.CurrentFolder,loadOption.sortOption);
         }
 
         internal void Open(string path)
+        {
+            Open(path,loadOption.sortOption);
+        }
+
+        internal void Open(FileSortOption option)
+        {
+            loadOption.sortOption = option;
+            Open(loadOption.CurrentFolder, option);
+        }
+
+        internal void Open(string path,FileSortOption option)
         {
             try
             {
@@ -142,9 +153,9 @@ namespace IVWPF
                     return;
                 }
 
-                string foldername = path !=null ? path : loadOption.CurrentFolder;
+                string foldername = path != null ? path : loadOption.CurrentFolder;
 
-                
+
                 if (!Directory.Exists(path))
                 {
                     foldername = System.Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
@@ -162,7 +173,7 @@ namespace IVWPF
 
 
 
-                DateTime date  = Directory.GetCreationTime(foldername);
+                DateTime date = Directory.GetCreationTime(foldername);
                 DirectoryInfo d = Directory.GetParent(foldername);
                 Grid grid;
                 if (d == null)
@@ -177,60 +188,78 @@ namespace IVWPF
                     items.Add(grid);
                     listBoxList.Add(d.FullName);
                 }
-                foreach (var info in dirInfos)
-                {
-                    grid = ListGrid(folderIcon, info.Name, info.CreationTime, -1);
-                    items.Add(grid);
-                    listBoxList.Add(info.FullName);
-                }
-                foreach (var info in infos)
-                {
-                    string ext = Path.GetExtension(info.Name).ToLower();
-                    BitmapImage bmp = null;
-                    switch (ext)
-                    {
-                        case ".bmp":
-                        case ".dib":
-                        case ".rle":
-                            bmp = bmpIcon;
-                            break;
-                        case ".ico":
-                        case ".icon":
-                            bmp = iconIcon;
-                            break;
-                        case ".gif":
-                            bmp = gifIcon;
-                            break;
-                        case ".jpeg":
-                        case ".jpe":
-                        case ".jpg":
-                        case ".jfif":
-                        case ".exif":
-                            bmp = jpegIcon;
-                            break;
-                        case ".png":
-                            bmp = pngIcon;
-                            break;
-                        case ".tiff":
-                        case ".tif":
-                            bmp = tiffIcon;
-                            break;
-                        case ".zip":
-                            bmp = zipIcon;
-                            break;
 
-                    }
-
-                    grid = ListGrid(bmp, info.Name, info.CreationTime, info.Length);
-                    items.Add(grid);
-                    listBoxList.Add(info.FullName);
-                    loadOption.CurrentFolder = foldername;
+                if (((int)option & (int)FileSortOption.SORT_DESC) == 1)
+                {
+                    AddFile(gifIcon, jpegIcon, pngIcon, zipIcon, iconIcon, tiffIcon, bmpIcon, foldername, infos, items, grid);
+                    AddFolder(folderIcon, dirInfos, items, grid);
+                } else
+                {
+                    AddFolder(folderIcon, dirInfos, items, grid);
+                    AddFile(gifIcon, jpegIcon, pngIcon, zipIcon, iconIcon, tiffIcon, bmpIcon, foldername, infos, items, grid);
                 }
                 window.FilerListBox.SelectedIndex = 0;
             }
             catch (Exception e)
             {
                 LogWriter.write(e.ToString());
+            }
+        }
+
+        private void AddFile(BitmapImage gifIcon, BitmapImage jpegIcon, BitmapImage pngIcon, BitmapImage zipIcon, BitmapImage iconIcon, BitmapImage tiffIcon, BitmapImage bmpIcon, string foldername, VirtualFileInfo[] infos, ItemCollection items, Grid grid)
+        {
+            foreach (var info in infos)
+            {
+                string ext = Path.GetExtension(info.Name).ToLower();
+                BitmapImage bmp = null;
+                switch (ext)
+                {
+                    case ".bmp":
+                    case ".dib":
+                    case ".rle":
+                        bmp = bmpIcon;
+                        break;
+                    case ".ico":
+                    case ".icon":
+                        bmp = iconIcon;
+                        break;
+                    case ".gif":
+                        bmp = gifIcon;
+                        break;
+                    case ".jpeg":
+                    case ".jpe":
+                    case ".jpg":
+                    case ".jfif":
+                    case ".exif":
+                        bmp = jpegIcon;
+                        break;
+                    case ".png":
+                        bmp = pngIcon;
+                        break;
+                    case ".tiff":
+                    case ".tif":
+                        bmp = tiffIcon;
+                        break;
+                    case ".zip":
+                        bmp = zipIcon;
+                        break;
+
+                }
+
+                grid = ListGrid(bmp, info.Name, info.CreationTime, info.Length);
+                items.Add(grid);
+                listBoxList.Add(info.FullName);
+                loadOption.CurrentFolder = foldername;
+            }
+        }
+
+        private void AddFolder(BitmapImage folderIcon, VirtualFileInfo[] dirInfos, ItemCollection items, Grid grid)
+        {
+            foreach (var info in dirInfos)
+            {
+                grid = ListGrid(folderIcon, info.Name, info.CreationTime, -1);
+                items.Add(grid);
+                listBoxList.Add(info.FullName);
             }
         }
 

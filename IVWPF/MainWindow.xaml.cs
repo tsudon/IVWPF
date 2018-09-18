@@ -387,6 +387,24 @@ namespace IVWPF
             }
         }
 
+
+        private void SortSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int i = SortSelect.SelectedIndex;
+            ReSortFile(i);
+
+        }
+
+        private void FilerListBox_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        {
+            double height = FilerListBox.ActualHeight;
+
+            int step = (int)(e.DeltaManipulation.Translation.Y / height * FilerListBox.Items.Count);
+            MoveFilerListBox(step);
+        }
+
+
+
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
             

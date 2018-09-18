@@ -794,7 +794,6 @@ namespace IVWPF
                 if (isManga)
                 {
                     manager.GetPreviousPath();
-                    manager.GetPreviousPath();
                     isManga = false;
                 }
                 string imagePath = manager.GetPreviousPath();

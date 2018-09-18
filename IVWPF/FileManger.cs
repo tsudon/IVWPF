@@ -112,6 +112,8 @@ namespace IVWIN
 
     /* 書き直した方が早いぐらいな酷いコード　*/
 
+
+
     class VirtualFileList
     {
         public string currentFileName;
@@ -126,6 +128,8 @@ namespace IVWIN
         public int dirPos = 0, parentLength = 1;
         public int nowpos;
         private LoadOption loadOption;
+
+
 
         public VirtualFileList(LoadOption loadOption)
         {
@@ -155,10 +159,8 @@ namespace IVWIN
                 {
                     string path = info.FullName;
                     string jsonPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)) + ".json";
-                    LogWriter.write($" {path}");
                     if (File.Exists(jsonPath))
                     {
-                        LogWriter.write($"add");
                         list.Add(info);
                     }
                 }
@@ -535,5 +537,7 @@ namespace IVWIN
         {
             return list.currentDir;
         }
+
+
     }
 }

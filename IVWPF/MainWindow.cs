@@ -151,6 +151,7 @@ namespace IVWPF
             int i = FilerListBox.SelectedIndex;
             if (i < 0) return;
             string path = filer.GetSelectedPath(i);
+            LogWriter.write(path);
             if (File.Exists(path))
             {
                 ImageMode(path);
@@ -159,6 +160,35 @@ namespace IVWPF
             {
                 filer.Open(path);
             }
+        }
+
+        private void ReSortFile(int i)
+        {
+            if (filer == null) return;
+            switch (i)
+            {
+                case 0:
+                    filer.Open(FileSortOption.SORT_BY_NAME_LOGICAL);
+                    break;
+                case 1:
+                    filer.Open(FileSortOption.SORT_BY_NAME_LOGICAL_DESC);
+                    break;
+                case 2:
+                    filer.Open(FileSortOption.SORT_BY_DATE);
+                    break;
+                case 3:
+                    filer.Open(FileSortOption.SORT_BY_DATE_DESC);
+                    break;
+                case 4:
+                    filer.Open(FileSortOption.SORT_BY_SIZE);
+                    break;
+                case 5:
+                    filer.Open(FileSortOption.SORT_BY_SIZE_DESC);
+                    break;
+                default:
+                    break;
+            }
+
         }
 
     }

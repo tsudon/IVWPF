@@ -25,6 +25,7 @@ namespace IVWIN
         SORT_BY_SIZE_DESC = 5,
         SORT_BY_NAME_LOGICAL = 6,
         SORT_BY_NAME_LOGICAL_DESC = 7,
+        SORT_DESC = 1
     }
 
     public class LoadOption
