@@ -172,7 +172,6 @@ namespace IVWPF
                 listBoxList.Clear();
 
 
-
                 DateTime date = Directory.GetCreationTime(foldername);
                 DirectoryInfo d = Directory.GetParent(foldername);
                 Grid grid;

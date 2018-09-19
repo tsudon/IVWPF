@@ -29,6 +29,7 @@ namespace IVWPF
         private FileManager manager;
 
         private string currentPath;
+        private bool isPrevious = false;
 
         public Loader(string imagePath, Image image,LoadOption load)
         {
@@ -75,8 +76,6 @@ namespace IVWPF
             LogWriter.write($"Load {imagePath}");
             try
             {
-
-
                 manager = new FileManager(imagePath, loadOption);
                 PaintPicture(manager.GetImagePath(imagePath));
                 loadOption.CurrentFile = currentPath;
@@ -158,8 +157,16 @@ namespace IVWPF
                     }
                     else
                     {
-
-                        String path = manager.GetNextPath(false);
+                        string path;
+                        if (isPrevious)
+                        {
+                            path = manager.GetPreviousPath(false);
+                            LogWriter.write($"PreviousLoad :{imagePath}\n{path}");
+                        }
+                        else
+                        {
+                            path = manager.GetNextPath(false);
+                        }
                         if (Path.GetExtension(imagePath) == ".zip")
                         {
                             RePaintPicture(bmp);
@@ -169,6 +176,7 @@ namespace IVWPF
                         }
 
                         BitmapDecoder decoder2 = GetDecoderFromPath(path);
+
 
                         if (decoder2 != null && decoder2.Frames.Count == 1
                             && decoder2.Frames[0].PixelHeight > decoder2.Frames[0].PixelWidth
@@ -183,6 +191,17 @@ namespace IVWPF
                                     BitmapSource bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
                                     BitmapSource bmp1 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
 
+                                    if (!isPrevious)
+                                    {
+                                        bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
+                                        bmp1 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+                                    }
+                                    else
+                                    {
+                                        bmp1 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
+                                        bmp0 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+                                    }
+
                                     int width = bmp0.PixelWidth + bmp1.PixelWidth;
                                     int height = (bmp0.PixelHeight > bmp1.PixelHeight) ? bmp0.PixelHeight : bmp1.PixelHeight;
 
@@ -193,7 +212,12 @@ namespace IVWPF
                                     double aspect = Image.MinWidth / Image.MinHeight;
                                     if (aspect > aspectSrc)
                                     {
-                                        manager.GetNextPath();
+                                        if (isPrevious) {
+                                            manager.GetPreviousPath();
+                                        }
+                                        else {
+                                            manager.GetNextPath();
+                                        }
                                         WriteableBitmap wbmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgra32, null);
                                         byte[] buf0 = new byte[bmp0.PixelWidth * bmp0.PixelHeight * 4];
                                         byte[] buf1 = new byte[bmp1.PixelWidth * bmp1.PixelHeight * 4];
@@ -206,6 +230,7 @@ namespace IVWPF
                                         bmp = wbmp;
                                     }
                                 }
+
                             }
                         }
                         RePaintPicture(bmp);
@@ -220,6 +245,7 @@ namespace IVWPF
             {
                 LogWriter.write(e.Message);
             }
+            isPrevious = false;
         }
 
         internal void OptionLoad()
@@ -793,13 +819,15 @@ namespace IVWPF
 
                 if (isManga)
                 {
-                    manager.GetPreviousPath();
                     isManga = false;
+                    isPrevious = true;
+                    manager.GetPreviousPath();
                 }
                 string imagePath = manager.GetPreviousPath();
                
                 if (imagePath == null) return;
                 PaintPicture(imagePath);
+
                 loadOption.CurrentFile = imagePath;
                 loadOption.CurrentFolder = manager.GetFolder();
 

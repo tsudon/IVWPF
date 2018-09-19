@@ -175,12 +175,10 @@ namespace IVWIN
         //親ディレクトリを取得 =0 current -1 previous +1 next
         public string GetParent(string path, int step)
         {
-//           LogWriter.write("#" + Parent.dirPos + "/" + Parent.dirInfos.Length + ":" + Parent.dirInfos[Parent.dirPos].DirectoryFullName);
             String dir = path;
 
             if (Parent != null)
             {
-
                 Parent.dirPos += step;
                 if (Parent.dirPos < 0)
                 {
@@ -198,7 +196,8 @@ namespace IVWIN
 
                 Parent = new VirtualFileList(loadOption);
                 Parent.SearchDirectry(infos[currentPos].Parent);
-                Parent.SearchCurrentDirectryPos(infos[currentPos].Parent);
+
+                Parent.SearchCurrentDirectryPos(infos[currentPos].DirectoryFullName);
 
                 DirectoryInfo directoryInfo = new DirectoryInfo(dir);
                 if (directoryInfo.FullName == null) return null;
@@ -212,6 +211,7 @@ namespace IVWIN
                 {
                     Parent.dirPos = 0;
                 }
+
             }
             return Parent.GetDirectory();
         }
@@ -220,23 +220,25 @@ namespace IVWIN
         //ハッシュ管理してない。ファイルが1000も無いかぎりパフォーマンスに差は無い（たぶん）
         public int SearchCurrentDirectryPos(string dirpath)
         {
+            LogWriter.write(dirpath);
             if (Directory.Exists(dirpath))
             {
                 for (int i = 0; i < dirInfos.Length; i++)
                 {
+                    LogWriter.write($"{i}:{dirInfos[i].FullName}");
                     if (dirInfos[i].FullName == dirpath)
                     {
                         dirPos = i;
                         break;
                     }
                 }
-                dirPos = 0;
             }
             else
             {
                 dirPos = 0;
                 return -1;
             }
+            LogWriter.write($"{dirPos}");
 
             return dirPos;
         }
@@ -257,6 +259,7 @@ namespace IVWIN
         {
             if (option)
             {
+                LogWriter.write($"{path}:{step}");
                 String str = GetParent(path, step);
                 if (str == null)
                 {
@@ -354,8 +357,15 @@ namespace IVWIN
                     }
                 }
             } while (infos[i].Type != FileType.File && infos[i].Type != FileType.Archive);
-            currentPos = flag ? i : old;
-            currentFileName = infos[currentPos].Name;
+            if (flag)
+            {
+                currentPos = i;
+                currentFileName = infos[currentPos].Name;
+            }
+            else
+            {
+                currentPos = old;
+            }
             string imagePath = Path.Combine(currentDir, infos[i].Name);
             return imagePath;
         }
@@ -391,12 +401,23 @@ namespace IVWIN
                     }
                     else
                     {
-                        currentPos = 0;
+                        currentPos = infos.Length - 1;
                     }
                 }
-            } while (infos[i].Type != FileType.File);
-            currentPos = flag ? i : old;
-            return GetCurrentFullName();
+            } while (infos[i].Type != FileType.File && infos[i].Type != FileType.Archive);
+
+            if (flag)
+            {
+                currentPos = i;
+                currentFileName = infos[currentPos].Name;
+            }
+            else
+            {
+                currentPos = old;
+            }
+            string imagePath = Path.Combine(currentDir, infos[i].Name);
+
+            return imagePath;
         }
 
         public string GetImagePath(string path)
