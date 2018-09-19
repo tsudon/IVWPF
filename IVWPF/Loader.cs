@@ -736,14 +736,15 @@ namespace IVWPF
             int width = (int)Image.MinWidth;
             int height = (int)Image.MinHeight;
 
+            int _width = width;
+            width = (int)(width * scaleX);
+            height = (int)(height * scaleY);
+
             scaleX *= deltaX;
             scaleY *= deltaY;
 
-
-
-            offsetX -= deltaX * width;
-            offsetY -= deltaX * height;
-
+            offsetX += (width - width * deltaX)/2;
+            offsetY += (height - height * deltaY)/2;
 
             TransformGroup transforms = new TransformGroup();
             transforms.Children.Add(new ScaleTransform(scaleX, scaleY));
@@ -888,7 +889,14 @@ namespace IVWPF
                     Image.BeginAnimation(Image.SourceProperty, null);
                     isAnimation = false;
                 }
-                String path = manager.GetNextFolderFile();
+                string path;
+                int cnt = 0, maxcount = manager.GetParentCount();
+                do
+                {
+                  path = manager.GetNextFolderFile();
+                  cnt++;
+                    if (cnt > maxcount) break;
+                } while (path == null);
                 PaintPicture(path);
                 loadOption.CurrentFile = path;
                 loadOption.CurrentFolder = manager.GetFolder();
@@ -915,7 +923,14 @@ namespace IVWPF
                     Image.BeginAnimation(Image.SourceProperty, null);
                     isAnimation = false;
                 }
-                String path = manager.GetPreviousFolderFile();
+                string path;
+                int cnt = 0, maxcount = manager.GetParentCount();
+                do
+                {
+                    path = manager.GetPreviousFolderFile();
+                    cnt++;
+                    if (cnt > maxcount) break;
+                } while (path == null);
                 PaintPicture(path);
                 loadOption.CurrentFile = path;
                 loadOption.CurrentFolder = manager.GetFolder();

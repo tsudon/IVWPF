@@ -129,6 +129,35 @@ namespace IVWPF
             Open(loadOption.CurrentFolder, option);
         }
 
+        internal void SetSort(FileSortOption option)
+        {
+            switch (option)
+            {
+                case FileSortOption.SORT_BY_NAME_LOGICAL:   //0
+                    window.SortSelect.SelectedIndex = 0;
+                    break;
+                case FileSortOption.SORT_BY_NAME_LOGICAL_DESC:  //1
+                    window.SortSelect.SelectedIndex = 1;
+                    break;
+                case FileSortOption.SORT_BY_DATE:       //2
+                    window.SortSelect.SelectedIndex = 2;
+                    break;
+                case FileSortOption.SORT_BY_DATE_DESC:      //3
+                    window.SortSelect.SelectedIndex = 3;
+                    break;
+                case FileSortOption.SORT_BY_SIZE:   //4
+                    window.SortSelect.SelectedIndex = 4;
+                    break;
+                case FileSortOption.SORT_BY_SIZE_DESC:  //5
+                    window.SortSelect.SelectedIndex = 5;
+                    break;
+                default:
+                    window.SortSelect.SelectedIndex = -1;
+                    break;
+            }
+        }
+
+
         internal void Open(string path,FileSortOption option)
         {
             try
@@ -198,6 +227,7 @@ namespace IVWPF
                     AddFile(gifIcon, jpegIcon, pngIcon, zipIcon, iconIcon, tiffIcon, bmpIcon, foldername, infos, items, grid);
                 }
                 window.FilerListBox.SelectedIndex = 0;
+                window.FilerListBox.ScrollIntoView(window.FilerListBox.SelectedItem);
             }
             catch (Exception e)
             {

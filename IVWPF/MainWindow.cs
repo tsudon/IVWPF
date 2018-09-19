@@ -119,10 +119,12 @@ namespace IVWPF
                     loader.PreviousPiture();
                     break;
                 case 6:
+                    loader.NextFolderPicture();
                     break;
                 case 7:
                     break;
                 case 8:
+                    loader.PreviousFolderPicture();
                     break;
             }
         }

@@ -118,7 +118,7 @@ namespace IVWPF
         private void MainCanvas_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
             ManipulationDelta delta = e.DeltaManipulation;
-//            loader.ResizePicture(delta.Scale.X,delta.Scale.Y);
+            loader.ResizePicture(delta.Scale.X,delta.Scale.Y);
             loader.MovePicture(delta.Translation.X, delta.Translation.Y);                        
 
         }
@@ -399,11 +399,14 @@ namespace IVWPF
         {
             double height = FilerListBox.ActualHeight;
 
-            int step = (int)(e.DeltaManipulation.Translation.Y / height * FilerListBox.Items.Count);
+            int step = (int)(e.DeltaManipulation.Rotation / 360  * FilerListBox.Items.Count);
             MoveFilerListBox(step);
         }
 
-
+        private void FilerListBox_TouchMove(object sender, TouchEventArgs e)
+        {
+            
+        }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {

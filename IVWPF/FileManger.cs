@@ -433,7 +433,7 @@ namespace IVWIN
 
         public string SearchDirectry(int step)
         {
-            string imagePath = Path.Combine(currentDir, currentFileName);
+            string imagePath = currentFileName == null ? currentDir :Path.Combine(currentDir, currentFullName);
             return SearchDirectry(imagePath,true, step);
 
         }
@@ -543,7 +543,7 @@ namespace IVWIN
         internal string GetNextFolderFile()
         {
             list.SearchDirectry(+1);
-            imagePath = list.GetNextPath(true);
+            imagePath = list.SetCurrentPos(0);
             return imagePath;
         }
 
@@ -559,6 +559,10 @@ namespace IVWIN
             return list.currentDir;
         }
 
-
+        internal int GetParentCount()
+        {
+            if (list.Parent == null) list.SearchDirectry(0);
+            return list.Parent.dirInfos.Length;
+        }
     }
 }
