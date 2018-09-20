@@ -10,29 +10,26 @@ namespace IVWIN
     {
         long ticks;
         public static string Text="Log... \n";
-        private static TextBox TextBox;
+        private static TextBlock _TextBlock;
 
         public LogWriter()
         {
             ticks = DateTimeOffset.Now.Ticks;
         }
 
-        static public void SetTextBox(TextBox box)
+        static public void SetTextBlock(TextBlock block)
         {
-            TextBox = box;
-            TextBox.Text = LogWriter.Text;
-            TextBox.ScrollToEnd();
+            _TextBlock = block;
+            _TextBlock.Inlines.Add(Text);
         }
 
 
         static public void write(String str)
         {
-//            LogWriter.Text += str + "\n";
 
-            if (TextBox != null)
+            if (_TextBlock != null)
             {
-                TextBox.Text = LogWriter.Text;
-                TextBox.ScrollToEnd();
+                _TextBlock.Inlines.Add($"{str}\n");
             }
             else
             {

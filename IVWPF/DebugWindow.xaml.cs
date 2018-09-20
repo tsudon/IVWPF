@@ -23,7 +23,12 @@ namespace IVWPF
         public DebugWindow()
         {
             InitializeComponent();
-            LogWriter.SetTextBox(Logger);
+            LogWriter.SetTextBlock(Logger);
+        }
+
+        private void Logger_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

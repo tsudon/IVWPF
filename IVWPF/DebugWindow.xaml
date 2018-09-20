@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="DebugWindow" Height="476" Width="640" WindowStyle="ToolWindow">
     <Grid x:Name="grid">
-        <TextBox x:Name="Logger" Margin="0" TextWrapping="Wrap" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" Background="Black" Foreground="White" CaretBrush="Black" OpacityMask="Black" BorderBrush="{x:Null}" IsReadOnly="True" Text="" >
-        </TextBox>
+        <TextBlock x:Name="Logger" Margin="0" TextWrapping="Wrap" Background="Black" Foreground="White">
+        </TextBlock>
     </Grid>
 </Window>

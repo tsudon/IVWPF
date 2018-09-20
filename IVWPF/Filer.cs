@@ -173,6 +173,7 @@ namespace IVWPF
                 BitmapImage bmpIcon = window.Resources["BmpICON"] as BitmapImage;
                 BitmapImage driveIcon = window.Resources["DriveICON"] as BitmapImage;
 
+                SetSort(option);
                 System.Collections.IDictionary directory = window.Resources;
 
                 if (path == "drive:")

@@ -146,8 +146,9 @@ namespace IVWPF
         bool pressShift = false;
         bool pressCtrl = false;
 
+#if DEBUG
         DebugWindow debug = null;
-
+#endif
 
         private void Main_KeyDown(object sender, KeyEventArgs e)
         {
@@ -188,14 +189,16 @@ namespace IVWPF
                         loader.SetMangaMode(true);
                         break;
                     case Key.D:
+#if DEBUG
                         if (debug == null || !debug.IsVisible)
                         {
                             debug = new DebugWindow();
-                            //                        LogWriter.textBox = debug.Logger;
+                            LogWriter.SetTextBlock(debug.Logger);
                             debug.Show();
                         }
                         break;
-                    case Key.S:
+#endif
+                        case Key.S:
                         loader.OptionSave();
                         break;
                     case Key.L:
@@ -320,10 +323,12 @@ namespace IVWPF
         private void WindowMain_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             loader.OptionSave();
+#if DEBUG
             if (debug != null)
             {
                 debug.Close();
             }
+#endif
         }
 
 
@@ -354,6 +359,8 @@ namespace IVWPF
 
         private void WindowMain_TouchDown(object sender, TouchEventArgs e)
         {
+
+
 
         }
 
@@ -395,18 +402,6 @@ namespace IVWPF
 
         }
 
-        private void FilerListBox_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
-        {
-            double height = FilerListBox.ActualHeight;
-
-            int step = (int)(e.DeltaManipulation.Rotation / 360  * FilerListBox.Items.Count);
-            MoveFilerListBox(step);
-        }
-
-        private void FilerListBox_TouchMove(object sender, TouchEventArgs e)
-        {
-            
-        }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {

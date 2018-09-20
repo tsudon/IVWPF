@@ -55,12 +55,46 @@
                     </ComboBox>
                 </Grid>
                 <Grid x:Name="grid" Grid.Row="2" Background="{Binding Background, ElementName=button}" Height="40"/>
-                <ListBox x:Name="FilerListBox" Grid.Row="1" FontSize="16" Grid.IsSharedSizeScope="True" MinWidth="{Binding Width, ElementName=grid}" Background="{Binding Mode=OneWay, Source={StaticResource BmpICON}}" MouseLeftButtonUp="FilerListBox_MouseLeftButtonUp" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedIndex="5" IsManipulationEnabled="True" ManipulationDelta="FilerListBox_ManipulationDelta" TouchMove="FilerListBox_TouchMove">
+                <ListBox x:Name="FilerListBox" Grid.Row="1" FontSize="16" Grid.IsSharedSizeScope="True" MinWidth="{Binding Width, ElementName=grid}" Background="{Binding Mode=OneWay, Source={StaticResource BmpICON}}" MouseLeftButtonUp="FilerListBox_MouseLeftButtonUp" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedIndex="0" IsManipulationEnabled="True" AllowDrop="False">
                     <Grid Background="#FFE5E5E5" RenderTransformOrigin="1.553,6" Width="38"/>
                 </ListBox>
             </Grid>
         </TabItem>
         <TabItem x:Name="SettingTab" Header="TabItem" Width="0" Height="0" IsEnabled="False">
+            <Grid x:Name="SettingGrid" Background="#FFECECEC" Margin="0,0,0,0">
+                <WrapPanel HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Vertical">
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
+                    <Label Content="Label"/>
+                    <Label Content="Label"/>
+                </WrapPanel>
+            </Grid>
         </TabItem>
     </TabControl>
 </Window>
