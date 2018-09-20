@@ -105,11 +105,21 @@ namespace IVWPF
             switch (p)
             {
                 case 0:
+                    if (loadOption.isMangaMode)
+                    {
+                        loadOption.isMangaMode = false;
+                        LoadPicture(loadOption.CurrentFile);
+                    }
                     break;
                 case 1:
                     FilerMode();
                     break;
                 case 2:
+                    if (!loadOption.isMangaMode)
+                    {
+                        loadOption.isMangaMode = true;
+                        LoadPicture(loadOption.CurrentFile);
+                    }
                     break;
                 case 3:
                     loader.NextPiture();
