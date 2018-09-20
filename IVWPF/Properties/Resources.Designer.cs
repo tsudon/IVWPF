@@ -59,23 +59,5 @@ namespace IVWPF.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   IVWPF に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string Application {
-            get {
-                return ResourceManager.GetString("Application", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Image に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string BacktoImage {
-            get {
-                return ResourceManager.GetString("BacktoImage", resourceCulture);
-            }
-        }
     }
 }

@@ -47,8 +47,12 @@ namespace IVWPF
             if (loadOption ==null)loadOption = new LoadOption();
             //            loader = new Loader(path, IVWImage,loadOption);
             loader = new Loader(IVWImage,loadOption);
+            loader.SetTitleCallback = SetWindowTitle;
             filer = new Filer(this,loadOption);
-            this.Title = loadOption.GetApplicationName();
+            if (loadOption.CurrentFile != null)
+            {
+                loader.SetTitleCallback(loadOption.CurrentFile);
+            }
             FolderLabel.Content = loadOption.CurrentFolder;
         }
 
@@ -60,13 +64,24 @@ namespace IVWPF
 
         private void Image_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta >= 120)
-            {
-                loader.PreviousPiture();
-            }
-            else if (e.Delta <= -120)
-            {
-                loader.NextPiture();
+            if(pressCtrl){
+                if (e.Delta >= 120)
+                {
+                    loader.ResizePicture(1.1,1.1);
+                }
+                else if (e.Delta <= -120)
+                {
+                    loader.ResizePicture(0.9,0.9);
+                }
+            } else{
+                if (e.Delta >= 120)
+                {
+                    loader.PreviousPiture();
+                }
+                else if (e.Delta <= -120)
+                {
+                    loader.NextPiture();
+                }
             }
         }
 
@@ -335,7 +350,7 @@ namespace IVWPF
         private void Image_Drop(object sender, DragEventArgs e)
         {
             string[] fileName = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            loader.Load(fileName[0]);
+           LoadPicture(fileName[0]);
         }
 
         private void ImageGrid_DragOver(object sender, DragEventArgs e)

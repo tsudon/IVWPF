@@ -14,6 +14,7 @@ namespace IVWPF
 {
     /*Loaderの本体 フォームから分離する */
 
+    delegate void SetTitle(string path);
 
     class Loader
     {
@@ -31,10 +32,21 @@ namespace IVWPF
         private string currentPath;
         private bool isPrevious = false;
 
+        public SetTitle SetTitleCallback;
+
+
+        public void DefaltSetTitle(string path)
+        {
+
+        }
+
+
         public Loader(string imagePath, Image image,LoadOption load)
         {
             this.Image = image;
             this.loadOption = load;
+
+            SetTitleCallback = this.DefaltSetTitle;
 
             if (imagePath != null)
             {
@@ -238,8 +250,7 @@ namespace IVWPF
                     }
                 }
                 currentPath = imagePath;
-
-
+                SetTitleCallback(currentPath);
             }
             catch (Exception e)
             {
@@ -733,18 +744,18 @@ namespace IVWPF
 
         public void ResizePicture(double deltaX, double deltaY)
         {
-            int width = (int)Image.MinWidth;
-            int height = (int)Image.MinHeight;
+            double width = Image.ActualWidth;
+            double height = Image.ActualHeight;
 
-            int _width = width;
-            width = (int)(width * scaleX);
-            height = (int)(height * scaleY);
+            width = width * scaleX;
+            height = height * scaleY;
 
             scaleX *= deltaX;
             scaleY *= deltaY;
 
             offsetX += (width - width * deltaX)/2;
             offsetY += (height - height * deltaY)/2;
+
 
             TransformGroup transforms = new TransformGroup();
             transforms.Children.Add(new ScaleTransform(scaleX, scaleY));

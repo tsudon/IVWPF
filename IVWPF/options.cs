@@ -66,9 +66,14 @@ namespace IVWIN
             Load();
         }
 
-        internal string GetApplicationName()
+        public string GetApplicationName()
         {
             return ApplicationName;
+        }
+
+        public string GetVersion()
+        {
+            return Version;
         }
 
         public void Save()
@@ -161,7 +166,6 @@ namespace IVWIN
             }
 
         }
-
 
     }
 }

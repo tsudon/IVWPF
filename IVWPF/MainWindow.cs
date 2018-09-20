@@ -141,7 +141,7 @@ namespace IVWPF
         {
             MainTab.SelectedIndex = (int)TabList.ImageTab;
             LogWriter.write("Switch Viewer");
-            loader.Load(path);
+            LoadPicture(path);
         }
 
         private void ImageMode()
@@ -193,5 +193,23 @@ namespace IVWPF
             }
 
         }
+
+        private void  LoadPicture(string path){
+           SetWindowTitle(path);
+           loader.Load(path);
+        }
+
+        private void SetWindowTitle(string path) {
+            try
+            {
+                string name = new FileInfo(path).Name;
+                this.Title = $"{loadOption.GetApplicationName()} {loadOption.GetVersion()} - {name}";
+            }
+            catch
+            {
+                this.Title = $"{loadOption.GetApplicationName()}";
+            }
+        }
+
     }
 }

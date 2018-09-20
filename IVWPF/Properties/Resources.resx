@@ -117,12 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Application" xml:space="preserve">
-    <value>IVWPF</value>
-    <comment>Application Name</comment>
-  </data>
-  <data name="BacktoImage" xml:space="preserve">
-    <value>Image</value>
-    <comment>イメージに戻るボタン</comment>
-  </data>
 </root>
