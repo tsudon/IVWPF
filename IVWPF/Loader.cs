@@ -15,6 +15,8 @@ namespace IVWPF
     /*Loaderの本体 フォームから分離する */
 
     delegate void SetTitle(string path);
+    delegate void LoadStart();
+    delegate void LoadEnd();
 
     class Loader
     {
@@ -33,9 +35,16 @@ namespace IVWPF
         private bool isPrevious = false;
 
         public SetTitle SetTitleCallback;
+        public LoadStart LoadStartCallback = DefaultCallback; 
+        public LoadEnd LoadEndCallback = DefaultCallback;
 
 
         public void DefaltSetTitle(string path)
+        {
+
+        }
+
+        static public void DefaultCallback()
         {
 
         }
@@ -117,7 +126,7 @@ namespace IVWPF
 
         public void PaintPicture(string imagePath)
         {
-
+            LoadStartCallback();
             try
             {
                 LocalDecoder decoder;
@@ -184,6 +193,7 @@ namespace IVWPF
                             RePaintPicture(bmp);
                             Image.Source = bmp;
                             currentPath = imagePath;
+                            LoadEndCallback();
                             return;
                         }
 
@@ -257,6 +267,7 @@ namespace IVWPF
                 LogWriter.write(e.Message);
             }
             isPrevious = false;
+            LoadEndCallback();
         }
 
         internal void OptionLoad()

@@ -48,6 +48,9 @@ namespace IVWPF
             //            loader = new Loader(path, IVWImage,loadOption);
             loader = new Loader(IVWImage,loadOption);
             loader.SetTitleCallback = SetWindowTitle;
+            loader.LoadStartCallback = LodingStart;
+            loader.LoadEndCallback = LoadingEnd;
+
             filer = new Filer(this,loadOption);
             if (loadOption.CurrentFile != null)
             {
@@ -214,10 +217,10 @@ namespace IVWPF
                         break;
 #endif
                         case Key.S:
-                        loader.OptionSave();
+
                         break;
                     case Key.L:
-                        loader.OptionLoad();
+
                         break;
 
                     case Key.Home:

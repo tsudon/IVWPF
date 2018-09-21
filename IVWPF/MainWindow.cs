@@ -209,7 +209,7 @@ namespace IVWPF
            loader.Load(path);
         }
 
-        private void SetWindowTitle(string path) {
+        public void SetWindowTitle(string path) {
             try
             {
                 string name = new FileInfo(path).Name;
@@ -220,6 +220,17 @@ namespace IVWPF
                 this.Title = $"{loadOption.GetApplicationName()}";
             }
         }
+
+        public void LodingStart()
+        {
+            LoadingEllipse.Visibility = Visibility.Visible;
+        }
+
+        public void LoadingEnd()
+        {
+            LoadingEllipse.Visibility = Visibility.Hidden;
+        }
+
 
     }
 }

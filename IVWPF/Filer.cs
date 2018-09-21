@@ -173,9 +173,10 @@ namespace IVWPF
                 BitmapImage bmpIcon = window.Resources["BmpICON"] as BitmapImage;
                 BitmapImage driveIcon = window.Resources["DriveICON"] as BitmapImage;
 
+                window.SetWindowTitle(null);
+
                 SetSort(option);
                 System.Collections.IDictionary directory = window.Resources;
-
                 if (path == "drive:")
                 {
                     window.FolderLabel.Content = "drive:";
@@ -296,6 +297,7 @@ namespace IVWPF
         internal void DriveList()
         {
             BitmapImage driveIcon = window.Resources["DriveICON"] as BitmapImage;
+            BitmapImage folderIcon = window.Resources["FolderICON"] as BitmapImage;
             ItemCollection items = window.FilerListBox.Items;
             Grid grid;
             string[] drives = Directory.GetLogicalDrives();
@@ -309,7 +311,10 @@ namespace IVWPF
                 items.Add(grid);
                 listBoxList.Add(drive);
             }
-
+            string mypictures= System.Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            listBoxList.Add(mypictures);
+            grid = ListGrid(folderIcon, mypictures, new DateTime(), -1);
+            items.Add(grid);
         }
 
         public string GetSelectedPath(int num)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -45,6 +46,7 @@ namespace IVWIN
         private string SavePath;
 
 
+
         public LoadOption(){
             CurrentFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 
@@ -75,6 +77,8 @@ namespace IVWIN
         {
             return Version;
         }
+
+
 
         public void Save()
         {
