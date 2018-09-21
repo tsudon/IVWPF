@@ -7,7 +7,7 @@ using System.Windows.Media.Imaging;
 using System.Collections.ObjectModel;
 using IVWIN;
 using System.Windows.Media.Animation;
-
+using System.Threading.Tasks;
 
 namespace IVWPF
 
@@ -124,6 +124,8 @@ namespace IVWPF
 
         private bool isManga = false;
 
+
+
         public void PaintPicture(string imagePath)
         {
             LoadStartCallback();
@@ -202,12 +204,13 @@ namespace IVWPF
 
                         if (decoder2 != null && decoder2.Frames.Count == 1
                             && decoder2.Frames[0].PixelHeight > decoder2.Frames[0].PixelWidth
-                            && bmp.PixelHeight > bmp.PixelWidth 
-                            && (decoder2.Frames[0].PixelHeight >= bmp.PixelHeight * 0.8) 
+                            && bmp.PixelHeight > bmp.PixelWidth
+                            && (decoder2.Frames[0].PixelHeight >= bmp.PixelHeight * 0.8)
                             && (decoder2.Frames[0].PixelHeight <= bmp.PixelHeight * 1.2))
                         {
 
-                            if (Image.MinWidth >= Image.MinHeight) {
+                            if (Image.MinWidth >= Image.MinHeight)
+                            {
                                 if (decoder2.Frames.Count == 1 || loadOption.isAnimate != false)
                                 {
                                     BitmapSource bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
@@ -234,10 +237,12 @@ namespace IVWPF
                                     double aspect = Image.MinWidth / Image.MinHeight;
                                     if (aspect > aspectSrc)
                                     {
-                                        if (isPrevious) {
+                                        if (isPrevious)
+                                        {
                                             manager.GetPreviousPath();
                                         }
-                                        else {
+                                        else
+                                        {
                                             manager.GetNextPath();
                                         }
                                         WriteableBitmap wbmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgra32, null);
