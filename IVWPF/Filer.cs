@@ -228,7 +228,17 @@ namespace IVWPF
                     AddFolder(folderIcon, dirInfos, items, grid);
                     AddFile(gifIcon, jpegIcon, pngIcon, zipIcon, iconIcon, tiffIcon, bmpIcon, foldername, infos, items, grid);
                 }
-                window.FilerListBox.SelectedIndex = 0;
+                int num;
+
+                if (loadOption.CurrentFile != null)
+                {
+                    num = listBoxList.FindIndex(s => s.Equals(loadOption.CurrentFile));
+                } else
+                {
+                    num = listBoxList.FindIndex(s => s.Equals(loadOption.CurrentFolder));
+                }
+                if (num < 0) num = 0;
+                window.FilerListBox.SelectedIndex = num;
                 window.FilerListBox.ScrollIntoView(window.FilerListBox.SelectedItem);
             }
             catch (Exception e)

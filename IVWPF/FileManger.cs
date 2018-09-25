@@ -564,5 +564,10 @@ namespace IVWIN
             if (list.Parent == null) list.SearchDirectry(0);
             return list.Parent.dirInfos.Length;
         }
+
+        internal string GetCurrentPath()
+        {
+            return list.GetCurrentFullName();
+        }
     }
 }

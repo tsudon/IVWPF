@@ -171,6 +171,7 @@ namespace IVWPF
             }
             else
             {
+                loadOption.CurrentFile = null;
                 filer.Open(path);
             }
         }

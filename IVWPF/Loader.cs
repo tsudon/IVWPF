@@ -54,7 +54,7 @@ namespace IVWPF
         {
             this.Image = image;
             this.loadOption = load;
-
+            isPrevious = false;
             SetTitleCallback = this.DefaltSetTitle;
 
             if (imagePath != null)
@@ -70,6 +70,7 @@ namespace IVWPF
         {
             this.Image = image;
             this.loadOption = load;
+            isPrevious = false;
 
             if (load.CurrentFile != null)
             {
@@ -184,7 +185,6 @@ namespace IVWPF
                         if (isPrevious)
                         {
                             path = manager.GetPreviousPath(false);
-                            LogWriter.write($"PreviousLoad :{imagePath}\n{path}");
                         }
                         else
                         {
@@ -206,59 +206,55 @@ namespace IVWPF
                             && decoder2.Frames[0].PixelHeight > decoder2.Frames[0].PixelWidth
                             && bmp.PixelHeight > bmp.PixelWidth
                             && (decoder2.Frames[0].PixelHeight >= bmp.PixelHeight * 0.8)
-                            && (decoder2.Frames[0].PixelHeight <= bmp.PixelHeight * 1.2))
-                        {
+                            && (decoder2.Frames[0].PixelHeight <= bmp.PixelHeight * 1.2)
+                            && decoder2.Frames.Count == 1
+                            && (Image.MinWidth >= Image.MinHeight)
+                            )
 
-                            if (Image.MinWidth >= Image.MinHeight)
                             {
-                                if (decoder2.Frames.Count == 1 || loadOption.isAnimate != false)
-                                {
-                                    BitmapSource bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
-                                    BitmapSource bmp1 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+                                BitmapSource bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
+                                BitmapSource bmp1 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
 
-                                    if (!isPrevious)
+                                if (!isPrevious)
+                                {
+                                    bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
+                                    bmp1 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+                                }
+                                else
+                                {
+                                    bmp1 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
+                                    bmp0 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+                                }
+
+                                int width = bmp0.PixelWidth + bmp1.PixelWidth;
+                                int height = (bmp0.PixelHeight > bmp1.PixelHeight) ? bmp0.PixelHeight : bmp1.PixelHeight;
+
+                                int offsetY0 = (height - bmp0.PixelHeight) / 2;
+                                int offsetY1 = (height - bmp1.PixelHeight) / 2;
+
+                                double aspectSrc = (double)width / (double)height * 0.8; //許容値
+                                double aspect = Image.MinWidth / Image.MinHeight;
+                                if (aspect > aspectSrc)
+                                {
+                                    if (isPrevious)
                                     {
-                                        bmp0 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
-                                        bmp1 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+                                        imagePath = manager.GetPreviousPath();
                                     }
                                     else
                                     {
-                                        bmp1 = new FormatConvertedBitmap(bmp, PixelFormats.Bgra32, null, 0);
-                                        bmp0 = new FormatConvertedBitmap(decoder2.Frames[0], PixelFormats.Bgra32, null, 0);
+                                        manager.GetNextPath();
                                     }
-
-                                    int width = bmp0.PixelWidth + bmp1.PixelWidth;
-                                    int height = (bmp0.PixelHeight > bmp1.PixelHeight) ? bmp0.PixelHeight : bmp1.PixelHeight;
-
-                                    int offsetY0 = (height - bmp0.PixelHeight) / 2;
-                                    int offsetY1 = (height - bmp1.PixelHeight) / 2;
-
-                                    double aspectSrc = (double)width / (double)height * 0.8; //許容値
-                                    double aspect = Image.MinWidth / Image.MinHeight;
-                                    if (aspect > aspectSrc)
-                                    {
-                                        if (isPrevious)
-                                        {
-                                            manager.GetPreviousPath();
-                                        }
-                                        else
-                                        {
-                                            manager.GetNextPath();
-                                        }
-                                        WriteableBitmap wbmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgra32, null);
-                                        byte[] buf0 = new byte[bmp0.PixelWidth * bmp0.PixelHeight * 4];
-                                        byte[] buf1 = new byte[bmp1.PixelWidth * bmp1.PixelHeight * 4];
-                                        bmp0.CopyPixels(buf0, bmp0.PixelWidth * 4, 0);
-                                        bmp1.CopyPixels(buf1, bmp1.PixelWidth * 4, 0);
-                                        wbmp.WritePixels(new Int32Rect(0, offsetY1, bmp1.PixelWidth, bmp1.PixelHeight), buf1, bmp1.PixelWidth * 4, 0);
-                                        wbmp.WritePixels(new Int32Rect(bmp1.PixelWidth, offsetY0, bmp0.PixelWidth, bmp0.PixelHeight), buf0, bmp0.PixelWidth * 4, 0);
-                                        wbmp.Freeze();
-                                        isManga = true;
-                                        bmp = wbmp;
-                                    }
+                                    WriteableBitmap wbmp = new WriteableBitmap(width, height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                                    byte[] buf0 = new byte[bmp0.PixelWidth * bmp0.PixelHeight * 4];
+                                    byte[] buf1 = new byte[bmp1.PixelWidth * bmp1.PixelHeight * 4];
+                                    bmp0.CopyPixels(buf0, bmp0.PixelWidth * 4, 0);
+                                    bmp1.CopyPixels(buf1, bmp1.PixelWidth * 4, 0);
+                                    wbmp.WritePixels(new Int32Rect(0, offsetY1, bmp1.PixelWidth, bmp1.PixelHeight), buf1, bmp1.PixelWidth * 4, 0);
+                                    wbmp.WritePixels(new Int32Rect(bmp1.PixelWidth, offsetY0, bmp0.PixelWidth, bmp0.PixelHeight), buf0, bmp0.PixelWidth * 4, 0);
+                                    wbmp.Freeze();
+                                    isManga = true;
+                                    bmp = wbmp;
                                 }
-
-                            }
                         }
                         RePaintPicture(bmp);
                         Image.Source = bmp;
@@ -272,6 +268,7 @@ namespace IVWPF
                 LogWriter.write(e.Message);
             }
             isPrevious = false;
+
             LoadEndCallback();
         }
 
@@ -702,8 +699,6 @@ namespace IVWPF
 
                 Image.Source = bmp;
                 Image.BeginAnimation(Image.SourceProperty, animation);
-
-
             }
             catch (Exception e)
             {
@@ -781,8 +776,8 @@ namespace IVWPF
         }
 
 
-         private bool MoveFrame(int step) { 
-            framePos+= step;
+         private bool MoveFrame(int step) {
+            framePos += step;
             if (framePos < 0 || framePos > bitmapFrames.Count) return false;
 
             bmp = bitmapFrames[framePos];
@@ -818,6 +813,7 @@ namespace IVWPF
                 string imagePath = manager.GetNextPath();
                 if (imagePath == null) return;
                 PaintPicture(imagePath);
+                imagePath = manager.GetCurrentPath();
                 loadOption.CurrentFile = imagePath;
                 loadOption.CurrentFolder = manager.GetFolder();
 
@@ -851,13 +847,16 @@ namespace IVWPF
                     isPrevious = true;
                     manager.GetPreviousPath();
                 }
-                string imagePath = manager.GetPreviousPath();
-               
+                string imagePath = manager.GetPreviousPath();             
                 if (imagePath == null) return;
                 PaintPicture(imagePath);
-
+                imagePath = manager.GetCurrentPath();
                 loadOption.CurrentFile = imagePath;
                 loadOption.CurrentFolder = manager.GetFolder();
+                if (isManga)
+                {
+                    manager.GetNextPath();
+                }
 
                 if (!isAnimation)
                 {
