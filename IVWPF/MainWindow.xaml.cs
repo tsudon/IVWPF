@@ -133,31 +133,99 @@ namespace IVWPF
             Util.CalcDpi(this);
         }
 
-        private void MainCanvas_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+
+        Dictionary<int,TouchDevice> _touchesImageGrid = null;
+
+        private void ImageGrid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
-            ManipulationDelta delta = e.DeltaManipulation;
-            loader.ResizePicture(delta.Scale.X,delta.Scale.Y);
-            loader.MovePicture(delta.Translation.X, delta.Translation.Y);                        
+            //指　二本の時のみ
+            if (_touchesImageGrid.Count == 2)
+            {
+                ManipulationDelta delta = e.DeltaManipulation;
+                loader.ResizePicture(delta.Scale.X, delta.Scale.Y);
+                loader.MovePicture(delta.Translation.X, delta.Translation.Y);
+            }
+        }
+
+        private void ImageGrid_TouchDown(object sender, TouchEventArgs e)
+        {
+            if (_touchesImageGrid == null)
+            {
+                _touchesImageGrid = new Dictionary<int, TouchDevice>();
+            }
+
+            if(!_touchesImageGrid.ContainsKey(e.TouchDevice.Id))
+            {
+                _touchesImageGrid.Add(e.TouchDevice.Id, e.TouchDevice);
+            }
+            if(_touchesImageGrid.Count == 1)
+            {
+                Point p = e.GetTouchPoint(ImageGrid).Position;
+                _xImageGrid = p.X;
+                _yImageGrid = p.Y;
+            }
+        }
+
+        private void ImageGrid_TouchMove(object sender, TouchEventArgs e)
+        {
+//            TouchPoint p = e.GetTouchPoint(this);
+//            LogWriter.write(" " + p.Position.X + "," + p.Position.Y);
 
         }
 
-        private void MainCanvas_TouchDown(object sender, TouchEventArgs e)
+        private void ImageGrid_TouchUp(object sender, TouchEventArgs e)
         {
-            TouchPoint p = e.GetTouchPoint(this);
-            LogWriter.write(" " + p.Position.X + "," + p.Position.Y);
-        }
+            Point p = e.GetTouchPoint(ImageGrid).Position;
+            if (_touchesImageGrid.ContainsKey(e.TouchDevice.Id))
+            {
+                _touchesImageGrid.Remove(e.TouchDevice.Id);
+            }
 
-        private void MainCanvas_TouchMove(object sender, TouchEventArgs e)
-        {
-            TouchPoint p = e.GetTouchPoint(this);
-            LogWriter.write(" " + p.Position.X + "," + p.Position.Y);
+            double x = p.X;
+            double y = p.Y;
+            double deltaX = x - _xImageGrid;
+            double deltaY = y - _yImageGrid;
 
-        }
+            LogWriter.write($"{_xImageGrid},{_yImageGrid} - {x},{y} / {deltaX},{deltaY}");
 
-        private void MainCanvas_TouchUp(object sender, TouchEventArgs e)
-        {
-            TouchPoint p = e.GetTouchPoint(this);
-            LogWriter.write(" " + p.Position.X + "," + p.Position.Y);
+            switch (MainTab.SelectedIndex)
+
+            {
+                case 0:
+                    if (Math.Abs(deltaX) < _bounds && Math.Abs(deltaY) < _bounds)
+                    {
+                        ImageMouseDownMethod(p);
+                    }
+                    else if (Math.Abs(deltaY) < _swaip)
+                    {
+
+                        if (deltaX <= -1 * _swaip) //Right Swaip
+
+                        {
+                            loader.PreviousPiture();
+
+                        }
+                        else if (deltaX >= _swaip) //Left Swaip
+                        {
+                            loader.NextPiture();
+                        }
+                    }
+                    else if (Math.Abs(deltaX) < _swaip)
+                    {
+                        if (deltaY >= -1 * _swaip) //Up Swaip
+                        {
+                            //
+                        }
+                        else if (deltaY >= _swaip) //Down Swaip
+                        {
+                            //
+                        }
+                    }
+                    break;
+                case 1:
+                    //MainTab.SelectedIndex = 0;
+                    break;
+            }
         }
 
         bool pressAlt = false;
@@ -387,30 +455,70 @@ namespace IVWPF
 
         }
 
+        double _bounds = 20.0,_swaip =50.0;
+        double _xImageGrid, _yImageGrid;
+
         private void ImageGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            switch (MainTab.SelectedIndex)
-            {
-                case 0:
-                    ImageMouseDownMethod(e.GetPosition(this));
-                    break;
-                case 1:
-                    //MainTab.SelectedIndex = 0;
-                    break;
-            }
+
+            Point p = e.MouseDevice.GetPosition(ImageGrid);
+            _xImageGrid = p.X;
+            _yImageGrid = p.Y;
         }
-        private void ImageGrid_TouchDown(object sender, TouchEventArgs e)
+
+        private void ImageGrid_MouseUp(object sender, MouseButtonEventArgs e)
         {
+
+            Point p = e.MouseDevice.GetPosition(ImageGrid);
+
+            double x = p.X;
+            double y = p.Y;
+            double deltaX = x - _xImageGrid;
+            double deltaY = y - _yImageGrid;
+
+            LogWriter.write($"{_xImageGrid},{_yImageGrid} - {x},{y} / {deltaX},{deltaY}");
+
             switch (MainTab.SelectedIndex)
+
             {
                 case 0:
-                    ImageMouseDownMethod(e.GetTouchPoint(this).Position);
+                    if (Math.Abs(deltaX) < _bounds && Math.Abs(deltaY) < _bounds)
+                    {
+                        ImageMouseDownMethod(p);
+                    }
+                    else if (Math.Abs(deltaY) < _swaip)
+                    {
+
+                        if (deltaX <= -1 * _swaip) //Right Swaip
+
+                        {
+                            loader.PreviousPiture();
+
+                        }
+                        else if (deltaX >= _swaip) //Left Swaip
+                        {
+                            loader.NextPiture();
+                        }
+                    }
+                    else if (Math.Abs(deltaX) < _swaip)
+                    {
+                        if (deltaY >= -1 * _swaip) //Up Swaip
+                        {
+                            //
+                        }
+                        else if (deltaY >= _swaip) //Down Swaip
+                        {
+                            //
+                        }
+                    }
                     break;
                 case 1:
                     //MainTab.SelectedIndex = 0;
                     break;
             }
         }
+
+
 
 
         private void SortSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
