@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using IVWIN;
+using Path = System.IO.Path;
 
 namespace IVWPF
 {
@@ -164,15 +165,25 @@ namespace IVWPF
             int i = FilerListBox.SelectedIndex;
             if (i < 0) return;
             string path = filer.GetSelectedPath(i);
-            LogWriter.write(path);
+            LogWriter.write($"{path} {loadOption.CurrentFolder}");
             if (File.Exists(path))
             {
+                loadOption.CurrentFolder = Path.GetDirectoryName(path);
+                loadOption.CurrentFile = Path.GetFileName(path);
                 ImageMode(path);
             }
             else
             {
-                loadOption.CurrentFile = null;
-                filer.Open(path);
+                if (loadOption.CurrentFile != null)
+                {
+                    loadOption.CurrentFolder = Path.GetDirectoryName(loadOption.CurrentFile);
+                    loadOption.CurrentFile = null;
+                    filer.Open(path);
+                }
+                else
+                {
+                    filer.Open(path);
+                }
             }
         }
 

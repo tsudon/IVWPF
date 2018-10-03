@@ -56,7 +56,7 @@
     <TabItem x:Name="FilerTab" Header="TabItem" Width="0" Height="0" IsEnabled="False">
       <Grid x:Name="FilerGrid" Background="White">
         <Grid.RowDefinitions>
-          <RowDefinition x:Name="FireTabMenu" Height="40"/>
+          <RowDefinition x:Name="FilerTabMenu" Height="40"/>
           <RowDefinition/>
           <RowDefinition Height="40"/>
         </Grid.RowDefinitions>

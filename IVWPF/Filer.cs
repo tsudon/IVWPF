@@ -233,9 +233,13 @@ namespace IVWPF
                 if (loadOption.CurrentFile != null)
                 {
                     num = listBoxList.FindIndex(s => s.Equals(loadOption.CurrentFile));
-                } else
+                    LogWriter.write($"{num} {loadOption.CurrentFile}");
+                    LogWriter.write($"{num} {loadOption.CurrentFolder}");
+                }
+                else
                 {
                     num = listBoxList.FindIndex(s => s.Equals(loadOption.CurrentFolder));
+                    LogWriter.write($"{num} {loadOption.CurrentFolder}");
                 }
                 if (num < 0) num = 0;
                 window.FilerListBox.SelectedIndex = num;
