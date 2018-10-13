@@ -31,25 +31,6 @@
       <Grid x:Name="ImageGrid" Drop="Image_Drop" DragOver="ImageGrid_DragOver" Background="Black" Width="{Binding Width, ElementName=MainTab}" Height="{Binding Height, ElementName=MainTab}" MouseDown="ImageGrid_MouseDown" MouseUp="ImageGrid_MouseUp" IsManipulationEnabled="True" ManipulationDelta="ImageGrid_ManipulationDelta" TouchDown="ImageGrid_TouchDown" TouchMove="ImageGrid_TouchMove" TouchUp="ImageGrid_TouchUp">
         <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove" PreviewMouseWheel="Image_MouseWheel" IsManipulationEnabled="True" Grid.ColumnSpan="2" >
           <Image x:Name="IVWImage" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" ClipToBounds="True" SnapsToDevicePixels="True"  AllowDrop="True" RenderTransformOrigin="0,0" MinWidth="{Binding ActualWidth, ElementName=MainCanvas, Mode=OneWay}" MinHeight="{Binding ActualHeight, ElementName=MainCanvas, Mode=OneWay}" StretchDirection="DownOnly" Stretch="None" IsManipulationEnabled="True" IsEnabled="False"/>
-          <Ellipse x:Name="LoadingEllipse" Width="20" Height="20" HorizontalAlignment="Left" Panel.ZIndex="1" MinWidth="20" MinHeight="20" Margin="10,10,0,0" VerticalAlignment="Top" StrokeThickness="4" RenderTransformOrigin="0.5,0.5" ScrollViewer.VerticalScrollBarVisibility="Hidden" Visibility="Hidden" >
-            <Ellipse.Stroke>
-              <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
-                <GradientStop Color="#FFC87FFF"/>
-                <GradientStop Color="#FFC87FFF" Offset="1"/>
-                <GradientStop Color="#FFFF7FC8" Offset="0.5"/>
-                <GradientStop Color="#FFE24C7F" Offset="0.242"/>
-                <GradientStop Color="#FFEA2E5E" Offset="0.815"/>
-              </LinearGradientBrush>
-            </Ellipse.Stroke>
-            <Ellipse.RenderTransform>
-              <RotateTransform x:Name="rotate" Angle="0" CenterX="0" CenterY="0" />
-            </Ellipse.RenderTransform>
-            <Ellipse.Triggers>
-              <EventTrigger RoutedEvent="Loaded">
-                <BeginStoryboard Storyboard="{Binding Source={StaticResource RotateAnimation}}" />
-              </EventTrigger>
-            </Ellipse.Triggers>
-          </Ellipse>
         </Canvas>
       </Grid>
     </TabItem>
@@ -84,42 +65,6 @@
         <ListBox x:Name="FilerListBox" Grid.Row="1" FontSize="16" Grid.IsSharedSizeScope="True" MinWidth="{Binding Width, ElementName=grid}" Background="{Binding Mode=OneWay, Source={StaticResource BmpICON}}" MouseLeftButtonUp="FilerListBox_MouseLeftButtonUp" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedIndex="0" IsManipulationEnabled="True" AllowDrop="False">
           <Grid Background="#FFE5E5E5" RenderTransformOrigin="1.553,6" Width="38"/>
         </ListBox>
-      </Grid>
-    </TabItem>
-    <TabItem x:Name="SettingTab" Header="TabItem" Width="0" Height="0" IsEnabled="False">
-      <Grid x:Name="SettingGrid" Background="#FFECECEC" Margin="0,0,0,0">
-        <WrapPanel HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Vertical">
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Rectangle HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="394" Fill="White"/>
-          <Label Content="Label"/>
-          <Label Content="Label"/>
-        </WrapPanel>
       </Grid>
     </TabItem>
   </TabControl>

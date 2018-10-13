@@ -235,12 +235,10 @@ namespace IVWPF
 
         public void LodingStart()
         {
-            LoadingEllipse.Visibility = Visibility.Visible;
         }
 
         public void LoadingEnd()
         {
-            LoadingEllipse.Visibility = Visibility.Hidden;
         }
 
 

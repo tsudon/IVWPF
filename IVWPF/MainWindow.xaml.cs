@@ -212,11 +212,13 @@ namespace IVWPF
                         loader.NextFolderPicture();
                         break;
                     default:
+                        /*
                         String str = "";
                         if (pressCtrl) str += "CTRL+";
                         if (pressAlt) str += "ALT+";
                         if (pressShift) str += "SHIFT+";
                         LogWriter.write(str + key.ToString());
+                        */
                         break;
                 }
             }
