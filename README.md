@@ -74,7 +74,8 @@
 - 同時に２つ起動した場合の動作は保証されません（設定ファイルが上書きされてしまうからです）
 
 
-##作者
+## 作者
 tsudon
 * https://github.com/tsudon/IVWPF
 * https://qiita.com/tsudon
+* https://tsudon.github.io/
