@@ -472,6 +472,16 @@ namespace IVWPF
 
         }
 
+        private void FilerTopButton_Click(object sender, RoutedEventArgs e)
+        {
+            FilerSelect(0);
+        }
+
+        private void FilerBottomButton_Click(object sender, RoutedEventArgs e)
+        {
+            FilerSelect(-1);
+        }
+
         private void ImageGrid_TouchUp(object sender, TouchEventArgs e)
         {
             Point p = e.GetTouchPoint(ImageGrid).Position;

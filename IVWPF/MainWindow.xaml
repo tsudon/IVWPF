@@ -7,65 +7,94 @@
         x:Name="WindowMain" x:Class="IVWPF.MainWindow"
         mc:Ignorable="d"
         Title="IVWPF" Height="600" Width="800" MouseDoubleClick="Window_MouseDoubleClick" AllowDrop="True" Topmost="True" Loaded="Main_Loaded" PreviewKeyDown="Main_KeyDown" PreviewKeyUp="Main_KeyUp" Closing="WindowMain_Closing" Background="{x:Null}" Icon="Resources/IV.png" >
-  <Window.Resources>
-    <BitmapImage x:Key="BmpICON" UriSource="Resources/bmp.png" />
-    <BitmapImage x:Key="FolderICON" UriSource="Resources/folder.png" />
-    <BitmapImage x:Key="JpegICON" UriSource="Resources/jpeg.png" />
-    <BitmapImage x:Key="IconICON" UriSource="Resources/icon.png" />
-    <BitmapImage x:Key="PngICON" UriSource="Resources/png.png" />
-    <BitmapImage x:Key="GifICON" UriSource="Resources/gif.png" />
-    <BitmapImage x:Key="UpICON" UriSource="Resources/upfolder.png" />
-    <BitmapImage x:Key="ZipICON" UriSource="Resources/zip.png" />
-    <BitmapImage x:Key="TiffICON" UriSource="Resources/tiff.png" />
-    <BitmapImage x:Key="DriveICON" UriSource="Resources/drive.png" />
-    <Storyboard x:Key="RotateAnimation">
-      <DoubleAnimation
+    <Window.Resources>
+        <BitmapImage x:Key="BmpICON" UriSource="Resources/bmp.png" />
+        <BitmapImage x:Key="FolderICON" UriSource="Resources/folder.png" />
+        <BitmapImage x:Key="JpegICON" UriSource="Resources/jpeg.png" />
+        <BitmapImage x:Key="IconICON" UriSource="Resources/icon.png" />
+        <BitmapImage x:Key="PngICON" UriSource="Resources/png.png" />
+        <BitmapImage x:Key="GifICON" UriSource="Resources/gif.png" />
+        <BitmapImage x:Key="UpICON" UriSource="Resources/upfolder.png" />
+        <BitmapImage x:Key="ZipICON" UriSource="Resources/zip.png" />
+        <BitmapImage x:Key="TiffICON" UriSource="Resources/tiff.png" />
+        <BitmapImage x:Key="DriveICON" UriSource="Resources/drive.png" />
+        <Storyboard x:Key="RotateAnimation">
+            <DoubleAnimation
          Storyboard.TargetName="rotate"
          Storyboard.TargetProperty="Angle"
           From="0" To="360" Duration="0:0:01"
           RepeatBehavior="Forever" />
-    </Storyboard>
-  </Window.Resources>
-  <TabControl x:Name="MainTab" Margin="0" Background="Black" BorderBrush="Black" SelectedIndex="0" BorderThickness="0" Padding="0" Style="{DynamicResource TabControlStyle1}">
-    <TabItem Header="TabItem" Margin="0" Width="0" Height="0" BorderBrush="Black" IsEnabled="False">
-      <Grid x:Name="ImageGrid" Drop="Image_Drop" DragOver="ImageGrid_DragOver" Background="Black" Width="{Binding Width, ElementName=MainTab}" Height="{Binding Height, ElementName=MainTab}" MouseDown="ImageGrid_MouseDown" MouseUp="ImageGrid_MouseUp" IsManipulationEnabled="True" ManipulationDelta="ImageGrid_ManipulationDelta" TouchDown="ImageGrid_TouchDown" TouchMove="ImageGrid_TouchMove" TouchUp="ImageGrid_TouchUp">
-        <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove" PreviewMouseWheel="Image_MouseWheel" IsManipulationEnabled="True" Grid.ColumnSpan="2" >
-          <Image x:Name="IVWImage" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" ClipToBounds="True" SnapsToDevicePixels="True"  AllowDrop="True" RenderTransformOrigin="0,0" MinWidth="{Binding ActualWidth, ElementName=MainCanvas, Mode=OneWay}" MinHeight="{Binding ActualHeight, ElementName=MainCanvas, Mode=OneWay}" StretchDirection="DownOnly" Stretch="None" IsManipulationEnabled="True" IsEnabled="False"/>
-        </Canvas>
-      </Grid>
-    </TabItem>
-    <TabItem x:Name="FilerTab" Header="TabItem" Width="0" Height="0" IsEnabled="False">
-      <Grid x:Name="FilerGrid" Background="White">
-        <Grid.RowDefinitions>
-          <RowDefinition x:Name="FilerTabMenu" Height="40"/>
-          <RowDefinition/>
-          <RowDefinition Height="40"/>
-        </Grid.RowDefinitions>
+        </Storyboard>
+    </Window.Resources>
+    <TabControl x:Name="MainTab" Margin="0" Background="Black" BorderBrush="Black" SelectedIndex="0" BorderThickness="0" Padding="0" Style="{DynamicResource TabControlStyle1}">
+        <TabItem Header="TabItem" Margin="0" Width="0" Height="0" BorderBrush="Black" IsEnabled="False">
+            <Grid x:Name="ImageGrid" Drop="Image_Drop" DragOver="ImageGrid_DragOver" Background="Black" Width="{Binding Width, ElementName=MainTab}" Height="{Binding Height, ElementName=MainTab}" MouseDown="ImageGrid_MouseDown" MouseUp="ImageGrid_MouseUp" IsManipulationEnabled="True" ManipulationDelta="ImageGrid_ManipulationDelta" TouchDown="ImageGrid_TouchDown" TouchMove="ImageGrid_TouchMove" TouchUp="ImageGrid_TouchUp">
+                <Canvas x:Name="MainCanvas" Margin="0" SizeChanged="Image_SizeChanged"  MouseLeftButtonDown="Image_MouseLeftButtonDown" MouseLeftButtonUp="Image_MouseLeftButtonUp" MouseMove="Image_MouseMove" PreviewMouseWheel="Image_MouseWheel" IsManipulationEnabled="True" Grid.ColumnSpan="2" >
+                    <Image x:Name="IVWImage" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" ClipToBounds="True" SnapsToDevicePixels="True"  AllowDrop="True" RenderTransformOrigin="0,0" MinWidth="{Binding ActualWidth, ElementName=MainCanvas, Mode=OneWay}" MinHeight="{Binding ActualHeight, ElementName=MainCanvas, Mode=OneWay}" StretchDirection="DownOnly" Stretch="None" IsManipulationEnabled="True" IsEnabled="False"/>
+                </Canvas>
+                <ScrollBar Height="25" Margin="0" VerticalAlignment="Bottom" Width="Auto" MinWidth="0" Orientation="Horizontal" Background="{x:Null}" BorderBrush="SkyBlue" Foreground="Blue" AllowDrop="False" Visibility="Hidden">
+                    <ScrollBar.OpacityMask>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="Black" Offset="0"/>
+                            <GradientStop Color="White" Offset="1"/>
+                        </LinearGradientBrush>
+                    </ScrollBar.OpacityMask>
+                </ScrollBar>
+            </Grid>
+        </TabItem>
+        <TabItem x:Name="FilerTab" Header="TabItem" Width="0" Height="0" IsEnabled="False">
+            <Grid x:Name="FilerGrid" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="FilerTabMenu" Height="40"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
 
-        <Grid HorizontalAlignment="Left" Height="40" Margin="0" VerticalAlignment="Top" Width="{Binding ActualWidth, ElementName=FilerGrid, Mode=OneWay}" Grid.Column="2" Background="{Binding Background, ElementName=button}">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="40"/>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="60"/>
-            <ColumnDefinition Width="40"/>
-          </Grid.ColumnDefinitions>
-          <Button x:Name="button" Content="≡" HorizontalAlignment="Left" Width="40" Height="40" Background="#FF79C8FF" Foreground="White" FontFamily="Century" FontSize="20"/>
-          <Button x:Name="BuckImageButton" Content="IMG" Height="40" RenderTransformOrigin="0.5,0.5" Background="{Binding Background, ElementName=button}" Foreground="White" BorderBrush="#FF000E66" Margin="{Binding Width, ElementName=FilerTab, Mode=OneWay}" Width="40" Click="BuckImageButton_Click" Grid.Column="3"/>
-          <Label x:Name="FolderLabel" Margin="0" Height="40" HorizontalAlignment="Left" FontSize="20" ClipToBounds="True" Grid.Column="1"/>
-          <ComboBox x:Name="SortSelect" Grid.Column="2" SelectedIndex="0" Padding="5,0,0,0" Foreground="Black" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" ScrollViewer.CanContentScroll="True" IsReadOnly="True" Background="White" SelectionChanged="SortSelect_SelectionChanged" Style="{DynamicResource ComboBoxStyle1}">
-            <ComboBoxItem x:Name="comboBoxItem" Content="A→Z"/>
-            <ComboBoxItem Content="Z→A"/>
-            <ComboBoxItem Content="Date↑"/>
-            <ComboBoxItem Content="Date↓"/>
-            <ComboBoxItem Content="Size↑"/>
-            <ComboBoxItem Content="Size↓"/>
-          </ComboBox>
-        </Grid>
-        <Grid x:Name="grid" Grid.Row="2" Background="{Binding Background, ElementName=button}" Height="40"/>
-        <ListBox x:Name="FilerListBox" Grid.Row="1" FontSize="16" Grid.IsSharedSizeScope="True" MinWidth="{Binding Width, ElementName=grid}" Background="{Binding Mode=OneWay, Source={StaticResource BmpICON}}" MouseLeftButtonUp="FilerListBox_MouseLeftButtonUp" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedIndex="0" IsManipulationEnabled="True" AllowDrop="False">
-          <Grid Background="#FFE5E5E5" RenderTransformOrigin="1.553,6" Width="38"/>
-        </ListBox>
-      </Grid>
-    </TabItem>
-  </TabControl>
+                <Grid HorizontalAlignment="Left" Height="40" Margin="0" VerticalAlignment="Top" Width="{Binding ActualWidth, ElementName=FilerGrid, Mode=OneWay}" Grid.Column="2" Background="{Binding Background, ElementName=button}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="40"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="button" Content="≡" HorizontalAlignment="Left" Width="40" Height="40" Background="#FF79C8FF" Foreground="White" FontFamily="Century" FontSize="20"/>
+                    <Button x:Name="BuckImageButton" Content="IMG" Height="40" RenderTransformOrigin="0.5,0.5" Background="{Binding Background, ElementName=button}" Foreground="White" BorderBrush="#FF000E66" Margin="{Binding Width, ElementName=FilerTab, Mode=OneWay}" Width="40" Click="BuckImageButton_Click" Grid.Column="3"/>
+                    <Label x:Name="FolderLabel" Margin="0" Height="40" HorizontalAlignment="Left" FontSize="20" ClipToBounds="True" Grid.Column="1"/>
+                    <ComboBox x:Name="SortSelect" Grid.Column="2" SelectedIndex="0" Padding="5,0,0,0" Foreground="Black" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" ScrollViewer.CanContentScroll="True" IsReadOnly="True" Background="White" SelectionChanged="SortSelect_SelectionChanged" Style="{DynamicResource ComboBoxStyle1}">
+                        <ComboBoxItem x:Name="comboBoxItem" Content="A→Z"/>
+                        <ComboBoxItem Content="Z→A"/>
+                        <ComboBoxItem Content="Date↑"/>
+                        <ComboBoxItem Content="Date↓"/>
+                        <ComboBoxItem Content="Size↑"/>
+                        <ComboBoxItem Content="Size↓"/>
+                    </ComboBox>
+                </Grid>
+                <Grid x:Name="grid" Grid.Row="2" Background="{Binding Background, ElementName=button}" Height="40">
+                    <Button x:Name="FilerTopButton" Content="&gt;&gt;|" Height="40" Click="FilerTopButton_Click" Background="{Binding Background, ElementName=button}" FontFamily="Comic Sans MS" FontSize="24" RenderTransformOrigin="0.5,0.5" Margin="0" HorizontalAlignment="Left" Width="40" Foreground="White">
+                        <Button.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="-90"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Button.RenderTransform>
+                    </Button>
+                    <Button x:Name="FilerBottomButton" Content="&gt;&gt;|" HorizontalAlignment="Right" Width="40" Height="40" Margin="0" RenderTransformOrigin="0.5,0.5" Background="{Binding Background, ElementName=button}" FontSize="24" FontFamily="Comic Sans MS" Click="FilerBottomButton_Click" Foreground="White">
+                        <Button.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="90"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Button.RenderTransform>
+                    </Button>
+                </Grid>
+                <ListBox x:Name="FilerListBox" Grid.Row="1" FontSize="16" Grid.IsSharedSizeScope="True" MinWidth="{Binding Width, ElementName=grid}" Background="{Binding Mode=OneWay, Source={StaticResource BmpICON}}" MouseLeftButtonUp="FilerListBox_MouseLeftButtonUp" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedIndex="0" IsManipulationEnabled="True" AllowDrop="False">
+                    <Grid Background="#FFE5E5E5" RenderTransformOrigin="1.553,6" Width="38"/>
+                </ListBox>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

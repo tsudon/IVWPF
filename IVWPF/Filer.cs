@@ -172,6 +172,7 @@ namespace IVWPF
                 BitmapImage tiffIcon = window.Resources["TiffICON"] as BitmapImage;
                 BitmapImage bmpIcon = window.Resources["BmpICON"] as BitmapImage;
                 BitmapImage driveIcon = window.Resources["DriveICON"] as BitmapImage;
+                string folder = loadOption.CurrentFolder;
 
                 window.SetWindowTitle(null);
 
@@ -233,13 +234,13 @@ namespace IVWPF
                 if (loadOption.CurrentFile != null)
                 {
                     num = listBoxList.FindIndex(s => s.Equals(loadOption.CurrentFile));
-                    LogWriter.write($"{num} {loadOption.CurrentFile}");
-                    LogWriter.write($"{num} {loadOption.CurrentFolder}");
+                    LogWriter.write($"{num} Current File {loadOption.CurrentFile}");
+                    LogWriter.write($"{num} Current Folder {loadOption.CurrentFolder}");
                 }
                 else
                 {
-                    num = listBoxList.FindIndex(s => s.Equals(loadOption.CurrentFolder));
-                    LogWriter.write($"{num} {loadOption.CurrentFolder}");
+                    num = listBoxList.FindIndex(s => s.Equals(folder));
+                    LogWriter.write($"{num} Current Folder {folder}");
                 }
                 if (num < 0) num = 0;
                 window.FilerListBox.SelectedIndex = num;

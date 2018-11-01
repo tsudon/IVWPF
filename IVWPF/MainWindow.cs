@@ -178,13 +178,28 @@ namespace IVWPF
                 {
                     loadOption.CurrentFolder = Path.GetDirectoryName(loadOption.CurrentFile);
                     loadOption.CurrentFile = null;
+                    LogWriter.write($"Current Folder is {loadOption.CurrentFolder}");
                     filer.Open(path);
                 }
                 else
                 {
+                    LogWriter.write("Current File is null");
                     filer.Open(path);
                 }
             }
+        }
+
+        private void FilerSelect(int pos)
+        {
+            if (pos >= 0)
+            {
+                FilerListBox.SelectedIndex = pos;
+            }
+            else
+            {
+                FilerListBox.SelectedIndex = FilerListBox.Items.Count - 1;
+            }
+            FilerListBox.ScrollIntoView(FilerListBox.SelectedItem);
         }
 
         private void ReSortFile(int i)
